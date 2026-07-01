@@ -109,8 +109,8 @@
 
 **操作界面**
 ```
-<img src="/Sample_images/image1.png" alt="图片1" width="300"><br/>
-![图片1](Sample_images/image1.png?raw=true)
+<img src="./Sample_images/image1.png" width="320px"  alt="image1"/>
+
 <img src="/Sample_images/image (2).png" alt="图片2" width="300">
 <img src="/Sample_images/image (3).png" alt="图片3" width="300">
 <img src="/Sample_images/image (4).png" alt="图片4" width="300">
@@ -233,17 +233,6 @@ MiniDataStructureWeb/
 ### 本地开发
 
 本项目为纯本地站点，无外联库，无需构建步骤：
-
-```bash
-# 克隆仓库
-git clone https://github.com/your-username/MiniDataStructureWeb.git
-
-# 进入项目目录
-cd MiniDataStructureWeb
-
-# 启动本地服务器
-python -m http.server 8080
-```
 
 ### 添加新数据结构
 
