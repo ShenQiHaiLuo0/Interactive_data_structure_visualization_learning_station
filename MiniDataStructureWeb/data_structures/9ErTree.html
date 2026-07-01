@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>二叉树</title>
+    <link rel="stylesheet" href="../js/jquery-3.6.0.js">
+    <link rel="stylesheet" href="../css/maps.css">
+    <link rel="stylesheet" href="../plugins/bootstrap-3.4.1/css/bootstrap.css">
+    <link rel="stylesheet" href="../plugins/font-awesome-4.7.0/css/font-awesome.min.css">
+    
+    <style>
+        #mychart {
+            float: left;
+            width: 50%;
+            height: 1000px;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        /* 控制面板优化 */
+        .control-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            width: 30%;
+        }
+
+        /* 输入系统优化 */
+        input, select {
+            padding: 10px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin: 8px 0;
+            background: white;
+        }
+
+        input:focus, select:focus {
+            border-color: #74c0fc;
+            box-shadow: 0 0 0 4px rgba(116, 192, 252, 0.15);
+            outline: none;
+        }
+
+        input::placeholder {
+            color: #adb5bd;
+            font-style: italic;
+        }
+
+        /* 按钮系统优化 */
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 600;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+            margin: 8px 4px;
+        }
+
+        #addBtn {
+            background: linear-gradient(135deg, #40c057 0%, #2f9e44 100%);
+            color: white;
+        }
+
+        #delBtn, #setStartBtn, #setEndBtn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #fa5252 100%);
+            color: white;
+        }
+
+        #queryBtn, #preOrderBtn, #inOrderBtn, #postOrderBtn {
+            background: linear-gradient(135deg, #4dabf7 0%, #228be6 100%);
+            color: white;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            filter: brightness(110%);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 信息展示优化 */
+        #nodeInfo {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 2px solid #e9ecef;
+        }
+
+        #nodeInfo span {
+            color: #228be6;
+            font-weight: 600;
+        }
+
+        #pathInfo {
+            background: #fff9db;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border: 2px solid #ffe066;
+        }
+
+        #traversalResult {
+            background: #fff4e6;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            color: #d9480f;
+        }
+
+        /* 操作区划分 */
+        .control-panel > div {
+            border-top: 2px solid #f1f3f5;
+            padding: 15px 0;
+        }
+
+        .control-panel > div:first-child {
+            border-top: none;
+            padding-top: 0;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            #mychart {
+                width: 100%;
+                margin-top: 160px;
+            }
+
+            .control-panel {
+                position: static;
+                width: 90%;
+                margin: 20px auto;
+                box-shadow: none;
+            }
+
+            button {
+                width: 100%;
+                margin: 8px 0;
+            }
+        }
+
+        /* 保留原有特殊样式 */
+        .echarts-tree-node[style*="rgb(255, 0, 0)"] {
+            filter: drop-shadow(0 0 5px red);
+        }
+
+        .echarts-tree-node[style*="rgb(220, 53, 69)"] {
+            filter: drop-shadow(0 0 5px #00ff26);
+            transition: all 0.5s ease;
+        }
+
+        #pathNodes {
+            color: #28a745;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+<div class="side-nav">
+    <a href="../index.html" style="align-items:center;font-size:18px;font-weight:bold;color:#1971c2;text-decoration:none;">
+        <span class="glyphicon glyphicon-home" style="margin-right:10px;"></span>
+        数据结构可视化
+    </a>
+    <ul class="nav" style="list-style:none;">
+        <li><a href="../data_structures/1XianXingBiaoShun.html"><i class="bi bi-list-ul"></i><i class="fa fa-bars"></i> 顺序线性表</a></li>
+        <li><a href="../data_structures/2XianXingBiaoLian.html"><i class="bi bi-link-45deg"></i><i class="fa fa-link"></i> 链式线性表</a></li>
+        <li><a href="../data_structures/3stack.html"><i class="bi bi-stack"></i><i class="fa fa-database"></i> 栈</a></li>
+        <li><a href="../data_structures/4Queue.html"><i class="bi bi-arrow-bar-right"></i><i class="fa fa-random"></i> 队列</a></li>
+        <li><a href="../data_structures/4-1XunHuanQueue.html"><i class="bi bi-arrow-repeat"></i><i class="fa fa-refresh"></i> 循环队列</a></li>
+        <li><a href="../data_structures/5Chuan.html"><i class="bi bi-type"></i><i class="fa fa-font"></i> 串</a></li>
+        <li><a href="../data_structures/6ShuZu.html"><i class="bi bi-grid-3x3-gap"></i><i class="fa fa-table"></i> 数组</a></li>
+        <li><a href="../data_structures/7GuangYiBiao.html"><i class="bi bi-diagram-3"></i><i class="fa fa-sitemap"></i> 广义表</a></li>
+        <li><a href="../data_structures/8Tree.html"><i class="bi bi-tree"></i><i class="fa fa-tree"></i> 树</a></li>
+        <li><a href="../data_structures/9ErTree.html"><i class="bi bi-diagram-2"></i><i class="fa fa-code-fork"></i> 二叉树</a></li>
+        <li><a href="../data_structures/10Tu.html"><i class="bi bi-share"></i><i class="fa fa-share-alt"></i> 图</a></li>
+        <li><a href="../data_structures/11ChaZhao.html"><i class="bi bi-search"></i><i class="fa fa-search-plus"></i> 查找</a></li>
+        <li><a href="../data_structures/12Hash.html"><i class="bi bi-hash"></i><i class="fa fa-hashtag"></i> 哈希表</a></li>
+        <li><a href="../data_structures/13PaiXu.html"><i class="bi bi-sort-numeric-down"></i><i class="fa fa-sort-amount-asc"></i> 排序</a></li>
+        <li><a href="../data_structures/14AVLTree.html"><i class="bi bi-bounding-box"></i><i class="fa fa-balance-scale"></i> AVL树</a></li>
+        <li><a href="../data_structures/15ShenZhanShu.html"><i class="bi bi-arrow-down-up"></i><i class="fa fa-pagelines"></i> 伸展树</a></li>
+        <li><a href="../data_structures/16BTree.html"><i class="bi bi-diagram-3"></i><i class="fa fa-sitemap"></i> B树/B+树</a></li>
+        <li><a href="../data_structures/17ZuoShiDui.html"><i class="bi bi-boxes"></i><i class="fa fa-cubes"></i> 左式堆</a></li>
+        <li><a href="../data_structures/18OuLaHuiLu.html"><i class="bi bi-share"></i><i class="fa fa-share-alt"></i> 欧拉回路</a></li>
+        <li><a href="../data_structures/19ZiDingXiangXiaShenZhanShu.html"><i class="bi bi-arrow-down"></i><i class="fa fa-leaf"></i> 自底向下伸展树</a></li>
+        <li><a href="../data_structures/20HongHeiShu.html"><i class="bi bi-tree"></i><i class="fa fa-tree"></i> 红黑树</a></li>
+        <li><a href="../data_structures/21TreapTree.html"><i class="bi bi-shuffle"></i><i class="fa fa-random"></i> Treap树</a></li>
+        <li><a href="../data_structures/22FHQTree.html"><i class="bi bi-diagram-3"></i><i class="fa fa-sitemap"></i> FHQ Treap</a></li>
+        <li><a href="../data_structures/23KDtreeKNN.html"><i class="bi bi-geo-alt"></i><i class="fa fa-map-marker"></i> KD树/KNN</a></li>
+        <li><a href="../data_structures/24PeiDuiDui.html"><i class="bi bi-boxes"></i><i class="fa fa-cubes"></i> 配对堆</a></li>
+    </ul>
+</div>
+<div class="container">
+    <h2>二叉树</h2>
+    <div class="control-panel" style="float: left;">
+        <div>
+            <label>插入位置: </label>
+            <select id="position">
+                <option value="left">左子树</option>
+                <option value="right">右子树</option>
+            </select>
+        </div>
+        <div style="margin-top:5px;width: 90%;">
+            <label>节点值: </label>
+            <input type="text" id="nodeValue" placeholder="输入节点值">
+        </div>
+        <div style="margin-top:5px;width: 90%;">
+            <label>父节点值: </label>
+            <input type="text" id="parentValue" placeholder="可选，留空为根节点">
+        </div>
+        <div style="margin-top:5px">
+            <button id="addBtn">添加节点</button>
+            <button id="delBtn">删除节点</button>
+        </div>
+        <div style="margin-top:15px;border-top:1px solid #ddd;padding-top:10px;width: 250px;">
+            <h4>节点属性：</h4>
+            <br/>
+            <div class="input-group" style="margin-bottom:10px">
+                <input type="text" id="queryNodeValue" class="form-control" placeholder="输入节点值">
+                <span class="input-group-btn">
+                    <button class="btn btn-default" id="queryBtn" type="button">查询节点</button>
+                </span>
+            </div>
+            <div id="nodeInfo">
+                度：<span id="nodeDegree">0</span><br>
+                深度：<span id="nodeDepth">0</span><br>
+                高度：<span id="nodeHeight">0</span><br>
+                层次：<span id="nodeLevel">0</span>
+            </div>
+        </div>
+        <div style="margin-top:15px;border-top:1px solid #ddd;padding-top:10px;width=500px;width: 250px;">
+            <h4>路径设置：</h4>
+            <br/>
+            <div style="margin:5px 0">
+                <div class="input-group">
+                    <input type="text" id="startNodeValue" class="form-control" placeholder="输入起点节点值">
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" id="setStartBtn" type="button">设为起点</button>
+                    </span>
+                </div>
+            <br/>
+            </div>
+            <br/>
+            <div style="margin:5px 0">
+                <div class="input-group">
+                    <input type="text" id="endNodeValue" class="form-control" placeholder="输入终点节点值">
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" id="setEndBtn" type="button">设为终点</button>
+                    </span>
+                </div>
+            <br/>
+            </div>
+            <div id="pathInfo" style="margin-top:5px">
+                路径长度：<span id="pathLength">-</span><br>
+                路径节点：<span id="pathNodes" style="color:#28a745">-</span>
+            </div>
+        </div>
+        <div style="margin-top:15px;border-top:1px solid #ddd;padding-top:10px;width:250px;">
+            <h4>遍历操作：</h4>
+            <button id="preOrderBtn" style="margin:3px">前序遍历</button>
+            <button id="inOrderBtn" style="margin:3px">中序遍历</button>
+            <button id="postOrderBtn" style="margin:3px">后序遍历</button>
+            <div id="traversalResult" style="margin-top:10px;color:#dc3545;font-weight:bold;"></div>
+        </div>
+    </div>
+    <div id="mychart"></div>
+</div>
+<script src="../js/echarts.js"></script>
+<script>
+    let tree;
+    let myChart;
+    let pathStartNode = null;
+    let pathEndNode = null;
+    class TreeNode {
+        constructor(value) {
+            this.value = value;
+            this.left = null;
+            this.right = null;
+            this.parent = null;
+        }
+    }
+
+    class BinaryTree {
+        constructor() {
+            this.root = null;
+            this.selectedNode = null;
+        }
+
+        addNode(value, parentNode = null, isLeft = true) { // 新增位置参数
+            const newNode = new TreeNode(value);
+            if (!this.root) {
+                this.root = newNode;
+            } else {
+                parentNode = parentNode || this.selectedNode || this.root;
+                newNode.parent = parentNode;
+
+                // 根据参数选择插入位置
+                if (isLeft && !parentNode.left) {
+                    parentNode.left = newNode;
+                } else if (!isLeft && !parentNode.right) {
+                    parentNode.right = newNode;
+                } else {
+                    alert('该位置已有节点');
+                    return null;
+                }
+            }
+            return newNode;
+        }
+
+        deleteNode(node) {
+            if (!node) return;
+            const parent = node.parent;
+            if (parent) {
+                if (parent.left === node) parent.left = null;
+                if (parent.right === node) parent.right = null;
+            } else {
+                this.root = null;
+            }
+        }
+        getNodeLevel(node) {
+            let level = 0;
+            while (node.parent) {
+                level++;
+                node = node.parent;
+            }
+            return level;
+        }
+
+        // 新增方法：获取节点高度
+        getNodeHeight(node) {
+            if (!node) return -1;
+            return Math.max(
+                this.getNodeHeight(node.left),
+                this.getNodeHeight(node.right)
+            ) + 1;
+        }
+
+        // 新增方法：查找两个节点路径
+        findPathBetweenNodes(nodeA, nodeB) {
+            const pathToRoot = (n) => {
+                const path = [];
+                while (n) {
+                    path.push(n);
+                    n = n.parent;
+                }
+                return path;
+            };
+
+            const pathA = pathToRoot(nodeA);
+            const pathB = pathToRoot(nodeB);
+
+            // 寻找最近公共祖先
+            let lca = null;
+            for (let i = 0; i < pathA.length && !lca; i++) {
+                if (pathB.includes(pathA[i])) {
+                    lca = pathA[i];
+                }
+            }
+
+            // 构建路径
+            const path = [];
+            let current = nodeA;
+            while (current !== lca) {
+                path.push(current);
+                current = current.parent;
+            }
+            path.push(lca);
+
+            const bPath = [];
+            current = nodeB;
+            while (current !== lca) {
+                bPath.unshift(current);
+                current = current.parent;
+            }
+
+            return [...path, ...bPath];
+        }
+
+        // 前序遍历
+        preOrderTraversal() {
+            const result = [];
+            const traverse = (node) => {
+                if (!node) return;
+                result.push(node);
+                traverse(node.left);
+                traverse(node.right);
+            };
+            traverse(this.root);
+            return result;
+        }
+
+        // 中序遍历
+        inOrderTraversal() {
+            const result = [];
+            const traverse = (node) => {
+                if (!node) return;
+                traverse(node.left);
+                result.push(node);
+                traverse(node.right);
+            };
+            traverse(this.root);
+            return result;
+        }
+
+        // 后序遍历
+        postOrderTraversal() {
+            const result = [];
+            const traverse = (node) => {
+                if (!node) return;
+                traverse(node.left);
+                traverse(node.right);
+                result.push(node);
+            };
+            traverse(this.root);
+            return result;
+        }
+
+    }
+
+    // 高亮遍历过程（新增函数）
+    async function highlightTraversal(nodes) {
+        // 获取初始配置
+        const initialOption = myChart.getOption();
+
+        // 第一步：重置所有颜色
+        traverseTree(initialOption.series[0].data[0], node => {
+            node.itemStyle = { ...node.itemStyle, color: null }; // 保留其他样式属性
+        });
+        myChart.setOption(initialOption); // 立即应用重置
+
+        // 第二步：逐步高亮
+        for (const node of nodes) {
+            const currentOption = myChart.getOption(); // 每次获取最新配置
+
+            traverseTree(currentOption.series[0].data[0], treeNode => {
+                if (treeNode.value === node.value) {
+                    treeNode.itemStyle = {
+                        ...treeNode.itemStyle,
+                        color: '#00ff26', // 节点填充色
+                        borderColor: '#00ff26', // 边框色
+                        borderWidth: 10
+                    };
+                }
+            });
+
+            myChart.setOption({
+                series: [{
+                    ...currentOption.series[0],
+                    data: [...currentOption.series[0].data] // 确保触发更新
+                }]
+            });
+
+            await new Promise(resolve => setTimeout(resolve, 500)); // 修改800为500
+        }
+
+        // 第三步：最终清理（可选）
+        setTimeout(() => {
+            const finalOption = myChart.getOption();
+            traverseTree(finalOption.series[0].data[0], node => {
+                node.itemStyle = { ...node.itemStyle, color: null, borderColor: null };
+            });
+            myChart.setOption(finalOption);
+        }, nodes.length * 800 + 1000);
+    }
+
+    function updateNodeInfo(node) {
+        const degree = [node.left, node.right].filter(Boolean).length;
+        const depth = tree.getNodeLevel(node);
+        const height = tree.getNodeHeight(node);
+        const level = depth + 1; // 层次=深度+1
+
+        // 更新DOM元素（确保ID匹配）
+        document.getElementById('nodeDegree').textContent = degree;
+        document.getElementById('nodeDepth').textContent = depth;
+        document.getElementById('nodeHeight').textContent = height;
+        document.getElementById('nodeLevel').textContent = level;
+        const option = myChart.getOption();
+        option.series[0].data[0] && traverseTree(option.series[0].data[0], n => {
+            n.itemStyle = n.itemStyle || {};
+            n.itemStyle.borderColor = n.value === node.value ? '#28a745' : '#ccc';
+            n.itemStyle.borderWidth = n.value === node.value ? 2 : 0;
+        });
+        myChart.setOption(option);
+    }
+
+    function highlightPath(path) {
+        const option = myChart.getOption();
+
+        // 清除旧的高亮（保留选中节点的绿色边框）
+        option.series[0].data.forEach(treeData => {
+            traverseTree(treeData, node => {
+                node.itemStyle = node.itemStyle || {};
+                if (node.itemStyle.color === '#ff0000') { // 仅清除路径颜色
+                    node.itemStyle.color = null;
+                }
+            });
+        });
+
+        // 设置新路径颜色为橙色
+        path.forEach(node => {
+            traverseTree(option.series[0].data[0], treeNode => {
+                if (treeNode.value === node.value) {
+                    treeNode.itemStyle = treeNode.itemStyle || {};
+                    treeNode.itemStyle.color = '#ffa500'; // 改为橙色以区分选中状态
+                }
+            });
+        });
+
+        myChart.setOption(option);
+    }
+    function traverseTree(node, callback) {
+        callback(node);
+        if (node.children) {
+            node.children.forEach(child => traverseTree(child, callback));
+        }
+    }
+    function updateChart() {
+        if (!myChart) return; // 增加安全校验
+
+        const formatTreeData = (node) => {
+            const children = [];
+            // 左子树处理（添加连接线可见性判断）
+            const leftChild = node.left ? formatTreeData(node.left) : {
+                isPlaceholder: true,
+                name: '',
+                value: null,
+                itemStyle: { opacity: 0 },
+                symbolSize: 0.1, // 需要设置为非零值才能触发连接线
+                label: { show: false }
+            };
+
+            // 右子树处理
+            const rightChild = node.right ? formatTreeData(node.right) : {
+                isPlaceholder: true,
+                name: '',
+                value: null,
+                itemStyle: { opacity: 0 },
+                symbolSize: 0.1,
+                label: { show: false }
+            };
+
+            return {
+                name: node.value.toString(),
+                value: node.value,
+                children: [leftChild, rightChild],
+            };
+        };
+
+        const option = {
+            tooltip: {
+                trigger: 'item',
+                formatter: ({ data }) => data.value !== null ? `节点值: ${data.value}` : ''
+            },
+            series: [{
+                type: 'tree',
+                data: tree.root ? [formatTreeData(tree.root)] : [],
+                orient: 'vertical',
+                expandAndCollapse: false,
+                lineStyle: {
+                    opacity: (params) => {
+                        // 精确判断子节点类型
+                        const childData = params?.target?.data;
+                        return childData?.isPlaceholder ? 0 : 1; // 直接使用占位符标识
+                    },
+                    width: 2
+                },
+                label: {
+                    position: 'top',
+                    fontSize: 16,
+                    show: ({ data }) => !data.isPlaceholder
+                },
+                layout: 'orthogonal',
+                edgeShape: 'polyline',
+                edgeForkPosition: '0%',
+                itemStyle: {
+                    opacity: ({ data }) => data.isPlaceholder ? 0 : 1
+                }
+            }]
+        };
+        myChart.setOption(option);
+    }
+
+    function addNode() {
+        if (!tree) return; // 增加安全校验
+        const value = Math.floor(Math.random() * 100);
+        tree.addNode(value);
+        updateChart();
+    }
+
+    function deleteNode() {
+        if (!tree || !tree.selectedNode) {
+            alert('请先点击选中节点');
+            return;
+        }
+        tree.deleteNode(tree.selectedNode);
+        tree.selectedNode = null;
+        updateChart();
+    }
+
+    function clearTree() {
+        if (!tree) return;
+        tree.root = null;
+        updateChart();
+    }
+    function init() {
+        console.log('【初始化阶段1】', {
+            treeDefined: typeof tree !== 'undefined',
+            chartDefined: typeof myChart !== 'undefined'
+        });
+
+        tree = new BinaryTree();
+
+        const chartDom = document.getElementById('mychart');
+
+        myChart = echarts.init(document.getElementById('mychart'));
+
+        console.log('【初始化阶段2】', {
+            treeInstance: tree,
+            chartInstance: myChart
+        });
+
+
+        // 事件监听增加空值保护
+        myChart.on('click', ({ data }) => {
+            if (data?.$vars?.node) {
+                const node = data.$vars.node;
+                tree.selectedNode = node;
+                // 更新节点信息
+                updateNodeInfo(node);
+                tree.selectedNode = data.$vars.node;
+                myChart.dispatchAction({
+                    type: 'highlight',
+                    seriesIndex: 0,
+                    dataIndex: data.dataIndex
+                });
+            }
+        });
+
+        updateChart();
+    }
+
+
+    document.getElementById('setStartBtn').addEventListener('click', () => {
+        const node = validateNodeInput('startNodeValue');
+        if (node) {
+            pathStartNode = node;
+            alert('已设置路径起点: ' + node.value);
+        }
+    });
+    document.getElementById('setEndBtn').addEventListener('click', () => {
+        const node = validateNodeInput('endNodeValue');
+        if (node) {
+            pathEndNode = node;
+            alert('已设置路径终点: ' + node.value);
+
+            if (pathStartNode && pathEndNode) {
+                if (pathStartNode === pathEndNode) {
+                    alert('起点和终点不能相同');
+                    return;
+                }
+                const path = tree.findPathBetweenNodes(pathStartNode, pathEndNode);
+                highlightPath(path);
+
+                // 同时更新路径长度和节点序列
+                document.getElementById('pathLength').textContent = path.length - 1;
+                document.getElementById('pathNodes').textContent =
+                    path.map(n => n.value).join(' → '); // 使用箭头符号连接
+            }
+        }
+    });
+    document.getElementById('queryBtn').addEventListener('click', () => {
+        const value = document.getElementById('queryNodeValue').value.trim();
+        if (!value) {
+            alert('请输入要查询的节点值');
+            return;
+        }
+
+        const node = findNodeByValue(tree.root, parseInt(value));
+        if (!node) {
+            alert('未找到该节点');
+            return;
+        }
+
+        // 更新节点信息并高亮
+        updateNodeInfo(node);
+        myChart.dispatchAction({
+            type: 'highlight',
+            seriesIndex: 0,
+            dataIndex: getNodeDataIndex(node.value)
+        });
+    });
+    // 遍历按钮事件监听
+    document.getElementById('preOrderBtn').addEventListener('click', async () => {
+        if (!tree.root) return alert('树为空');
+        const nodes = tree.preOrderTraversal();
+        document.getElementById('traversalResult').textContent =
+            `前序遍历：${nodes.map(n => n.value).join(' → ')}`;
+        await highlightTraversal(nodes);
+    });
+
+    document.getElementById('inOrderBtn').addEventListener('click', async () => {
+        if (!tree.root) return alert('树为空');
+        const nodes = tree.inOrderTraversal();
+        document.getElementById('traversalResult').textContent =
+            `中序遍历：${nodes.map(n => n.value).join(' → ')}`;
+        await highlightTraversal(nodes);
+    });
+
+    document.getElementById('postOrderBtn').addEventListener('click', async () => {
+        if (!tree.root) return alert('树为空');
+        const nodes = tree.postOrderTraversal();
+        document.getElementById('traversalResult').textContent =
+            `后序遍历：${nodes.map(n => n.value).join(' → ')}`;
+        await highlightTraversal(nodes);
+    });
+    function getNodeDataIndex(value) {
+        let index = -1;
+        traverseTree(myChart.getOption().series[0].data[0], (n, i) => {
+            if (n.value === value) index = i;
+        });
+        return index;
+    }
+    function validateNodeInput(inputId) {
+        const value = document.getElementById(inputId).value.trim();
+        if (!value) {
+            alert('请输入节点值');
+            return null;
+        }
+        const node = findNodeByValue(tree.root, parseInt(value));
+        if (!node) {
+            alert('未找到对应节点');
+            return null;
+        }
+        return node;
+    }
+    // 新增工具函数
+    function findNodeByValue(node, value) {
+        if (!node) return null;
+        if (node.value == value) return node;
+        const leftResult = findNodeByValue(node.left, value);
+        if (leftResult) return leftResult;
+        return findNodeByValue(node.right, value);
+    }
+
+
+    function handleAdd() {
+        if (!tree) return;
+
+        // 先获取输入值
+        const valueInput = document.getElementById('nodeValue');
+        const parentInput = document.getElementById('parentValue');
+        const position = document.getElementById('position').value;
+
+        const value = parseInt(valueInput.value);
+        if (isNaN(value)) {
+            alert('请输入有效数字');
+            return;
+        }
+
+        // 查找父节点
+        let parentNode = null;
+        if (parentInput.value) {
+            const parentValue = parseInt(parentInput.value);
+            parentNode = findNodeByValue(tree.root, parentValue);
+            if (!parentNode) {
+                alert('未找到父节点');
+                return;
+            }
+        }
+
+        // 添加节点（参数顺序修正）
+        const isLeft = position === 'left';
+        const newNode = tree.addNode(value, parentNode, isLeft);
+        if (!newNode) return;
+
+        // 清空输入
+        valueInput.value = '';
+        parentInput.value = '';
+        updateChart();
+    }
+
+
+    function handleDelete() {
+        if (!tree) return;
+
+        const valueInput = document.getElementById('nodeValue');
+        const value = parseInt(valueInput.value);
+        if (isNaN(value)) {
+            alert('请输入有效数字');
+            return;
+        }
+
+        const targetNode = findNodeByValue(tree.root, value);
+        if (!targetNode) {
+            alert('未找到该节点');
+            return;
+        }
+
+        tree.deleteNode(targetNode);
+        updateChart();
+        valueInput.value = '';
+    }
+
+
+    document.addEventListener('DOMContentLoaded', init);
+    document.getElementById('addBtn').addEventListener('click', handleAdd);
+    document.getElementById('delBtn').addEventListener('click', handleDelete);
+</script>
+</body>
+</html>

@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>哈希表</title>
+    <link rel="stylesheet" href="../js/jquery-3.6.0.js">
+    <link rel="stylesheet" href="../css/maps.css">
+    <link rel="stylesheet" href="../plugins/bootstrap-3.4.1/css/bootstrap.css">
+    <link rel="stylesheet" href="../plugins/font-awesome-4.7.0/css/font-awesome.min.css">
+    
+    <style>
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 设置面板现代化 */
+        .settings-group {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+            border: 2px solid #f1f3f5;
+        }
+
+        /* 输入系统升级 */
+        .input-group {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            padding: 15px 0;
+            flex-wrap: wrap;
+            float: left;
+        }
+
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        input[type="number"],
+        input[type="text"],
+        select {
+            padding: 12px 18px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input[type="number"] {
+            width: 120px;
+        }
+
+        input[type="text"] {
+            width: 220px;
+        }
+
+        select {
+            width: 240px;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236c757d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 18px;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #74c0fc;
+            box-shadow: 0 0 0 4px rgba(116, 192, 252, 0.15);
+            outline: none;
+        }
+
+        /* 按钮系统重构 */
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 600;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        button[onclick="addElement()"] {
+            background: linear-gradient(135deg, #40c057 0%, #2f9e44 100%);
+            color: white;
+        }
+
+        button[onclick="clearHashTable()"] {
+            background: linear-gradient(135deg, #ff6b6b 0%, #fa5252 100%);
+            color: white;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            filter: brightness(110%);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 哈希表可视化增强 */
+        .hash-table {
+            margin-top: 25px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 25px;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
+        }
+
+        .slot {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 80px;
+            margin: 8px;
+            padding: 12px;
+            border: 2px solid #74c0fc;
+            border-radius: 8px;
+            background: #f8f9fa;
+            font-weight: 500;
+            transition: transform 0.2s ease;
+        }
+
+        .overflow-area {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff4e6;
+            border: 2px solid #ffe066;
+            border-radius: 8px;
+            color: #d9480f;
+        }
+
+        /* 元素列表样式 */
+        #elementList {
+            margin-top: 15px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 2px dashed #e9ecef;
+            color: #495057;
+            font-family: monospace;
+        }
+
+        /* 响应式优化 */
+        @media (max-width: 768px) {
+            .container {
+                margin-left: 0;
+                padding: 15px;
+            }
+
+            .input-group {
+                gap: 15px;
+            }
+
+            input[type="text"],
+            select {
+                width: 100%;
+            }
+
+            .button-group {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+
+        /* 保留核心布局结构 */
+        h4 {
+            color: #343a40;
+            font-size: 16px;
+            min-width: 100px;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+<div class="side-nav">
+    <a href="../index.html" style="align-items:center;font-size:18px;font-weight:bold;color:#1971c2;text-decoration:none;">
+        <span class="glyphicon glyphicon-home" style="margin-right:10px;"></span>
+        数据结构可视化
+    </a>
+    <ul class="nav" style="list-style:none;">
+        <li><a href="../data_structures/1XianXingBiaoShun.html"><i class="bi bi-list-ul"></i><i class="fa fa-bars"></i> 顺序线性表</a></li>
+        <li><a href="../data_structures/2XianXingBiaoLian.html"><i class="bi bi-link-45deg"></i><i class="fa fa-link"></i> 链式线性表</a></li>
+        <li><a href="../data_structures/3stack.html"><i class="bi bi-stack"></i><i class="fa fa-database"></i> 栈</a></li>
+        <li><a href="../data_structures/4Queue.html"><i class="bi bi-arrow-bar-right"></i><i class="fa fa-random"></i> 队列</a></li>
+        <li><a href="../data_structures/4-1XunHuanQueue.html"><i class="bi bi-arrow-repeat"></i><i class="fa fa-refresh"></i> 循环队列</a></li>
+        <li><a href="../data_structures/5Chuan.html"><i class="bi bi-type"></i><i class="fa fa-font"></i> 串</a></li>
+        <li><a href="../data_structures/6ShuZu.html"><i class="bi bi-grid-3x3-gap"></i><i class="fa fa-table"></i> 数组</a></li>
+        <li><a href="../data_structures/7GuangYiBiao.html"><i class="bi bi-diagram-3"></i><i class="fa fa-sitemap"></i> 广义表</a></li>
+        <li><a href="../data_structures/8Tree.html"><i class="bi bi-tree"></i><i class="fa fa-tree"></i> 树</a></li>
+        <li><a href="../data_structures/9ErTree.html"><i class="bi bi-diagram-2"></i><i class="fa fa-code-fork"></i> 二叉树</a></li>
+        <li><a href="../data_structures/10Tu.html"><i class="bi bi-share"></i><i class="fa fa-share-alt"></i> 图</a></li>
+        <li><a href="../data_structures/11ChaZhao.html"><i class="bi bi-search"></i><i class="fa fa-search-plus"></i> 查找</a></li>
+        <li><a href="../data_structures/12Hash.html"><i class="bi bi-hash"></i><i class="fa fa-hashtag"></i> 哈希表</a></li>
+        <li><a href="../data_structures/13PaiXu.html"><i class="bi bi-sort-numeric-down"></i><i class="fa fa-sort-amount-asc"></i> 排序</a></li>
+        <li><a href="../data_structures/14AVLTree.html"><i class="bi bi-bounding-box"></i><i class="fa fa-balance-scale"></i> AVL树</a></li>
+        <li><a href="../data_structures/15ShenZhanShu.html"><i class="bi bi-arrow-down-up"></i><i class="fa fa-pagelines"></i> 伸展树</a></li>
+        <li><a href="../data_structures/16BTree.html"><i class="bi bi-diagram-3"></i><i class="fa fa-sitemap"></i> B树/B+树</a></li>
+        <li><a href="../data_structures/17ZuoShiDui.html"><i class="bi bi-boxes"></i><i class="fa fa-cubes"></i> 左式堆</a></li>
+        <li><a href="../data_structures/18OuLaHuiLu.html"><i class="bi bi-share"></i><i class="fa fa-share-alt"></i> 欧拉回路</a></li>
+        <li><a href="../data_structures/19ZiDingXiangXiaShenZhanShu.html"><i class="bi bi-arrow-down"></i><i class="fa fa-leaf"></i> 自底向下伸展树</a></li>
+        <li><a href="../data_structures/20HongHeiShu.html"><i class="bi bi-tree"></i><i class="fa fa-tree"></i> 红黑树</a></li>
+        <li><a href="../data_structures/21TreapTree.html"><i class="bi bi-shuffle"></i><i class="fa fa-random"></i> Treap树</a></li>
+        <li><a href="../data_structures/22FHQTree.html"><i class="bi bi-diagram-3"></i><i class="fa fa-sitemap"></i> FHQ Treap</a></li>
+        <li><a href="../data_structures/23KDtreeKNN.html"><i class="bi bi-geo-alt"></i><i class="fa fa-map-marker"></i> KD树/KNN</a></li>
+        <li><a href="../data_structures/24PeiDuiDui.html"><i class="bi bi-boxes"></i><i class="fa fa-cubes"></i> 配对堆</a></li>
+    </ul>
+</div>
+<div class="container">
+    <h2>哈希表</h2>
+
+    <div class="settings-group">
+        <div class="input-group">
+            <h4 style="margin: 0; min-width: 100px;">哈希表大小:</h4>
+            <div class="input-row">
+                <input type="number" id="hashSize" value="10" min="5" max="20">
+            </div>
+            <div>
+                <div class="input-row">
+                    <h4 style="margin: 0; min-width: 100px;">输入元素:</h4>
+                    <input type="text" id="element" placeholder="输入数字元素">
+                    <div class="button-group">
+                        <button onclick="addElement()">添加元素</button>
+                        <button onclick="clearHashTable()">清除哈希表</button>
+                    </div>
+                </div>
+                <div id="elementList" style="margin-top: 8px; color: #6c757d;"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="settings-group">
+        <div class="input-group">
+            <h4 style="margin: 0; min-width: 100px;">哈希函数:</h4>
+            <select id="hashMethod">
+                <option value="1">直接定址法</option>
+                <option value="2">数字分析法</option>
+                <option value="3">平方取中法</option>
+                <option value="4" selected>除留余数法</option>
+                <option value="5">折叠法</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <h4 style="margin: 0; min-width: 100px;">冲突处理:</h4>
+            <select id="collisionMethod">
+                <option value="1">线性探查法</option>
+                <option value="2">二次探查法</option>
+                <option value="3">再哈希</option>
+                <option value="4">公共溢出区</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="hashTableDisplay" class="hash-table"></div>
+</div>
+<script src="../js/echarts.js"></script>
+<script>
+
+    let ht = null;
+    let elements = [];
+
+    class HashTable {
+        constructor(size) { // 改为接受size参数
+            this.size = size;
+            this.table = Array(size).fill().map(() => []);
+            this.overflow = [];
+        }
+
+        hashFunctions = {
+            '1': key => key % this.size, // 直接定址法
+            '2': key => { // 数字分析法（假设处理6位数字）
+                const str = key.toString().padStart(6, '0');
+                return parseInt(str.substr(2, 2)) % this.size; // 取中间两位
+            },
+            '3': key => { // 平方取中
+                const square = (key * key).toString().padStart(6, '0');
+                return parseInt(square.substr(2, 3)) % this.size;
+            },
+            '4': key => key % this.size, // 除留余数法
+            '5': key => { // 折叠法
+                return key.toString().split('').reduce((sum, d) => sum + parseInt(d), 0) % this.size;
+            }
+        };
+
+        // 冲突处理方法集合
+        collisionHandlers = {
+            '1': (index, key) => { // 线性探查
+                let i = 1;
+                while (this.table[(index + i) % this.size].length > 0) {
+                    i++;
+                    if (i > this.size) throw "哈希表已满";
+                }
+                return (index + i) % this.size;
+            },
+            '2': (index, key) => { // 二次探查
+                let i = 1;
+                while (this.table[(index + i * i) % this.size].length > 0) {
+                    i++;
+                    if (i > this.size) throw "哈希表已满";
+                }
+                return (index + i * i) % this.size;
+            },
+            '3': (index, key) => { // 链表法
+                this.table[index].push(key);
+                return index;
+            },
+            '4': (index, key) => { // 公共溢出区
+                this.overflow.push(key);
+                return index;
+            }
+        };
+
+        insert(key, hashMethod, collisionMethod) {
+            if (!this.hashFunctions[hashMethod]) throw `无效哈希方法: ${hashMethod}`;
+            if (!this.collisionHandlers[collisionMethod]) throw `无效冲突处理: ${collisionMethod}`;
+
+
+            const hashFn = this.hashFunctions[hashMethod];
+            const collisionFn = this.collisionHandlers[collisionMethod];
+
+            let index = hashFn(key);
+            if (index < 0 || index >= this.size) {
+                throw `哈希值越界: ${index} (允许范围0-${this.size - 1})`;
+            }
+
+            // 冲突处理
+            if (this.table[index].length === 0) {
+                this.table[index] = [key];
+            } else {
+                index = collisionFn.call(this, index, key);
+            }
+        }
+
+        display() {
+            const mainTable = this.table.map((slot, i) =>
+                `<div class="slot">${i}: ${slot.join(' → ')}</div>`
+            ).join('');
+
+            const overflow = this.overflow.length ?
+                `<div class="overflow-area">
+            <strong>溢出区:</strong> ${this.overflow.join(' → ')}
+        </div>` : '';
+
+            return mainTable + overflow;
+        }
+    }
+
+    function addElement() {
+        try {
+            const input = document.getElementById('element');
+            const key = parseInt(input.value);
+            if (isNaN(key)) throw "请输入有效数字";
+
+            if (!ht) { // 首次使用时初始化
+                const size = parseInt(document.getElementById('hashSize')?.value) || 10;
+                ht = new HashTable(size);
+            }
+
+            const hashMethod = document.getElementById('hashMethod').value;
+            const collisionMethod = document.getElementById('collisionMethod').value;
+
+            ht.insert(key, hashMethod, collisionMethod);
+            elements.push(key);
+
+            // 更新显示
+            document.getElementById('elementList').textContent = `已添加元素: [${elements.join(', ')}]`;
+            updateDisplay();
+            input.value = ''; // 清空输入框
+        } catch (e) {
+            alert(`添加失败: ${e}`);
+        }
+    }
+
+    // 新增清除功能
+    function clearHashTable() {
+        ht = null;
+        elements = [];
+        document.getElementById('elementList').textContent = '';
+        document.getElementById('hashTableDisplay').innerHTML = '';
+    }
+
+    // 提取显示更新逻辑
+    function updateDisplay() {
+        document.getElementById('hashTableDisplay').innerHTML = `
+        <h4>哈希表结构：</h4>
+        ${ht.display()}
+        <div style="margin-top:10px; color:#666">
+            哈希函数: ${document.getElementById('hashMethod').selectedOptions[0].text}<br>
+            冲突处理: ${document.getElementById('collisionMethod').selectedOptions[0].text}
+        </div>
+    `;
+    }
+</script>
+</body>
+</html>
