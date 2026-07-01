@@ -95,7 +95,7 @@
 
 **下载**
 ```
-下载压缩包MiniDataStructureWeb.zip到本地<br/>
+下载压缩包MiniDataStructureWeb.zip到本地
 然后使用任意解压缩工具得到文件夹：MiniDataStructureWeb进入即可。
 ```
 
@@ -103,6 +103,15 @@
 
 ```
 双击 index.html 即可在浏览器中打开
+```
+
+### 实例展示
+
+**方式一：直接打开**
+```
+![Uploading image.png…]()
+
+
 ```
 
 ## 项目结构
