@@ -99,21 +99,6 @@
 双击 index.html 即可在浏览器中打开
 ```
 
-**方式二：本地服务器（推荐）**
-
-```bash
-# Python
-python -m http.server 8080
-
-# Node.js
-npx serve .
-
-# VS Code
-# 安装 Live Server 扩展 → 右键 index.html → Open with Live Server
-```
-
-然后访问 `http://localhost:8080`
-
 ## 项目结构
 
 ```
@@ -272,6 +257,8 @@ python -m http.server 8080
 <div align="center">
 
 **如果这个项目对你的学习有帮助，欢迎 Star 支持！**
+</div>
+<div align="center">
 **这是我2025年西南某某大学的毕业论文设计的简化版本，原始代码中套用了django+mysql支撑，更加灵活且面向生产工作环境。但在这里只保留了核心内容，且为均已构建为本地库，更欢迎对数据结构学习和感兴趣的老师同学朋友使用。**
 **如果有需要可以联系我E-mail：dfhuh@foxmail.com**    
 </div>
