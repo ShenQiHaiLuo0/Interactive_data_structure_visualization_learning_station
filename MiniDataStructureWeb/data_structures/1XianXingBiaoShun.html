@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>顺序存储线性表</title>
+    <link rel="stylesheet" href="../js/jquery-3.6.0.js">
+    <link rel="stylesheet" href="../css/maps.css">
+    <link rel="stylesheet" href="../plugins/bootstrap-3.4.1/css/bootstrap.css">
+    <link rel="stylesheet" href="../plugins/font-awesome-4.7.0/css/font-awesome.min.css">
+    <style>
+        .container {
+            display: flex;
+        }
+
+        .array-container {
+            display: flex;
+            gap: 2px;
+            margin: 20px 0;
+            position: relative;
+            min-height: 100px;
+        }
+
+        .cell {
+            width: 60px;
+            height: 40px;
+            border: 2px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            background: #fff;
+            transition: all 0.3s ease-in-out;
+            position: absolute;
+            left: 0;
+            font-family: monospace;
+            font-weight: bold;
+        }
+
+        .cell.empty {
+            background: #f8f9fa;
+            color: #6c757d;
+        }
+
+        .cell.moving {
+            z-index: 1;
+            background: #ffc107 !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .highlight {
+            background: #17a2b8 !important;
+            color: white;
+        }
+
+        .move-right {
+            transform: translateX(60px);
+        }
+
+        .move-left {
+            transform: translateX(-60px);
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .controls button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .controls button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        .controls button:active {
+            transform: translateY(0);
+        }
+
+        .controls button:nth-child(1) {
+            background: #28a745;
+            color: white;
+        }
+
+        .controls button:nth-child(2) {
+            background: #dc3545;
+            color: white;
+        }
+
+        .controls button:nth-child(3) {
+            background: #007bff;
+            color: white;
+        }
+
+        .controls button:nth-child(4) {
+            background: #ffc107;
+            color: black;
+        }
+
+        .controls input {
+            padding: 8px;
+            border: 2px solid #ced4da;
+            border-radius: 4px;
+            transition: border-color 0.2s ease;
+        }
+
+        .controls input:focus {
+            outline: none;
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .operation-log {
+            border: 2px solid #dee2e6;
+            padding: 15px;
+            height: 250px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+
+        #log div {
+            padding: 6px 0;
+            border-bottom: 1px solid #eee;
+            color: #495057;
+        }
+
+        #log div:last-child {
+            border-bottom: none;
+        }
+
+        #traversal {
+            background: white;
+            padding: 15px;
+            border-radius: 4px;
+            border: 2px solid #dee2e6;
+            font-family: monospace;
+            font-size: 1.1em;
+            color: #2c3e50;
+            margin-top: 15px;
+        }
+
+        .size-control {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .size-control select {
+            padding: 6px 10px;
+            border-radius: 4px;
+        }
+
+        .inserted-cell {
+            background: #94d82d !important;
+            animation: fadeHighlight 1.2s ease-out;
+        }
+
+        @keyframes fadeHighlight {
+            from {
+                background: #94d82d;
+            }
+
+            to {
+                background: #fff;
+            }
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .array-container {
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .controls>div {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .controls button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="side-nav">
+    <a href="../index.html" style="align-items:center;font-size:18px;font-weight:bold;color:#1971c2;text-decoration:none;">
+        <span class="glyphicon glyphicon-home" style="margin-right:10px;"></span>
+        数据结构可视化
+    </a>
+    <ul class="nav" style="list-style:none;">
+        <li><a href="../data_structures/1XianXingBiaoShun.html"><i class="bi bi-list-ul"></i><i class="fa fa-bars"></i> 顺序线性表</a></li>
+        <li><a href="../data_structures/2XianXingBiaoLian.html"><i class="bi bi-link-45deg"></i><i class="fa fa-link"></i> 链式线性表</a></li>
+        <li><a href="../data_structures/3stack.html"><i class="bi bi-stack"></i><i class="fa fa-database"></i> 栈</a></li>
+        <li><a href="../data_structures/4Queue.html"><i class="bi bi-arrow-bar-right"></i><i class="fa fa-random"></i> 队列</a></li>
+        <li><a href="../data_structures/4-1XunHuanQueue.html"><i class="bi bi-arrow-repeat"></i><i class="fa fa-refresh"></i> 循环队列</a></li>
+        <li><a href="../data_structures/5Chuan.html"><i class="bi bi-type"></i><i class="fa fa-font"></i> 串</a></li>
+        <li><a href="../data_structures/6ShuZu.html"><i class="bi bi-grid-3x3-gap"></i><i class="fa fa-table"></i> 数组</a></li>
+        <li><a href="../data_structures/7GuangYiBiao.html"><i class="bi bi-diagram-3"></i><i class="fa fa-sitemap"></i> 广义表</a></li>
+        <li><a href="../data_structures/8Tree.html"><i class="bi bi-tree"></i><i class="fa fa-tree"></i> 树</a></li>
+        <li><a href="../data_structures/9ErTree.html"><i class="bi bi-diagram-2"></i><i class="fa fa-code-fork"></i> 二叉树</a></li>
+        <li><a href="../data_structures/10Tu.html"><i class="bi bi-share"></i><i class="fa fa-share-alt"></i> 图</a></li>
+        <li><a href="../data_structures/11ChaZhao.html"><i class="bi bi-search"></i><i class="fa fa-search-plus"></i> 查找</a></li>
+        <li><a href="../data_structures/12Hash.html"><i class="bi bi-hash"></i><i class="fa fa-hashtag"></i> 哈希表</a></li>
+        <li><a href="../data_structures/13PaiXu.html"><i class="bi bi-sort-numeric-down"></i><i class="fa fa-sort-amount-asc"></i> 排序</a></li>
+        <li><a href="../data_structures/14AVLTree.html"><i class="bi bi-bounding-box"></i><i class="fa fa-balance-scale"></i> AVL树</a></li>
+        <li><a href="../data_structures/15ShenZhanShu.html"><i class="bi bi-arrow-down-up"></i><i class="fa fa-pagelines"></i> 伸展树</a></li>
+        <li><a href="../data_structures/16BTree.html"><i class="bi bi-diagram-3"></i><i class="fa fa-sitemap"></i> B树/B+树</a></li>
+        <li><a href="../data_structures/17ZuoShiDui.html"><i class="bi bi-boxes"></i><i class="fa fa-cubes"></i> 左式堆</a></li>
+        <li><a href="../data_structures/18OuLaHuiLu.html"><i class="bi bi-share"></i><i class="fa fa-share-alt"></i> 欧拉回路</a></li>
+        <li><a href="../data_structures/19ZiDingXiangXiaShenZhanShu.html"><i class="bi bi-arrow-down"></i><i class="fa fa-leaf"></i> 自底向下伸展树</a></li>
+        <li><a href="../data_structures/20HongHeiShu.html"><i class="bi bi-tree"></i><i class="fa fa-tree"></i> 红黑树</a></li>
+        <li><a href="../data_structures/21TreapTree.html"><i class="bi bi-shuffle"></i><i class="fa fa-random"></i> Treap树</a></li>
+        <li><a href="../data_structures/22FHQTree.html"><i class="bi bi-diagram-3"></i><i class="fa fa-sitemap"></i> FHQ Treap</a></li>
+        <li><a href="../data_structures/23KDtreeKNN.html"><i class="bi bi-geo-alt"></i><i class="fa fa-map-marker"></i> KD树/KNN</a></li>
+        <li><a href="../data_structures/24PeiDuiDui.html"><i class="bi bi-boxes"></i><i class="fa fa-cubes"></i> 配对堆</a></li>
+    </ul>
+</div>
+<div class="container">
+    <div>
+        <h2>顺序存储线性表</h2>
+        <div class="controls">
+            <div class="size-control">
+                最大容量：
+                <select id="maxSize">
+                    <script>
+                        for (let i = 5; i <= 20; i++) {
+                            document.write(`<option value="${i}">${i}</option>`);
+                        }
+                    </script>
+                </select>
+                <button onclick="initList()">初始化</button>
+            </div>
+
+            <div id="array-display" class="array-container"></div>
+            <br>
+            <div>
+                <input type="text" id="inputValue" placeholder="输入值">
+                <input type="number" id="inputIndex" placeholder="位置(从0开始)">
+                <button onclick="insertElement()">插入</button>
+                <button onclick="deleteElement()">删除</button>
+            </div>
+            <div>
+                <input type="text" id="searchValue" placeholder="查找值">
+                <button onclick="searchByValue()">按值查找</button>
+                <input type="number" id="searchIndex" placeholder="查找位置">
+                <button onclick="searchByIndex()">按位置查找</button>
+            </div>
+        </div>
+
+        <div class="operation-log">
+            <h4>操作日志：</h4>
+            <div id="log"></div>
+        </div>
+        <div>
+            <h4>遍历结果：</h4>
+            <div id="traversal"></div>
+        </div>
+    </div>
+</div>
+<script src="../js/echarts.js"></script>
+<script>
+    let list = [];
+    let maxSize = 5;
+    let currentSize = 0;
+
+    function initList() {
+        maxSize = parseInt(document.getElementById('maxSize').value);
+        list = new Array(maxSize).fill(null);
+        currentSize = 0;
+        renderArray();
+        logOperation(`初始化成功，最大容量：${maxSize}`);
+    }
+
+    function renderArray() {
+        const container = document.getElementById('array-display');
+        container.innerHTML = '';
+
+        list.forEach((value, index) => {
+            const cell = document.createElement('div');
+            cell.className = `cell ${value === null ? 'empty' : ''}`;
+            cell.textContent = value || '空';
+            cell.style.left = (index * 62) + 'px'; // 设置绝对定位位置
+            cell.onclick = () => modifyElement(index);
+            container.appendChild(cell);
+        });
+    }
+
+    async function insertElement() {
+        const value = document.getElementById('inputValue').value;
+        const insertIndex = parseInt(document.getElementById('inputIndex').value); // 直接获取输入值
+
+        // 有效性检查调整为 >= currentSize
+        if (insertIndex < 0 || insertIndex > currentSize) {
+            alert('插入位置无效 (有效范围：0-' + currentSize + ')');
+            return;
+        }
+
+        if (currentSize >= maxSize) {
+            alert('顺序表已满！');
+            return;
+        }
+
+        if (insertIndex < 0 || insertIndex > currentSize) {
+            alert('插入位置无效');
+            return;
+        }
+
+        // 创建临时元素容器
+        const tempContainer = document.createElement('div');
+        tempContainer.style.position = 'relative';
+        tempContainer.style.width = (maxSize * 62) + 'px'; // 60px宽 + 2px间隙
+
+        // 克隆当前所有元素到临时容器
+        const cells = Array.from(document.getElementsByClassName('cell'));
+        cells.forEach((cell, index) => {
+            const clone = cell.cloneNode(true);
+            clone.style.left = (index * 62) + 'px';
+            tempContainer.appendChild(clone);
+        });
+
+        // 替换显示容器
+        const arrayDisplay = document.getElementById('array-display');
+        arrayDisplay.replaceWith(tempContainer);
+        tempContainer.id = 'array-display';
+
+        // 高亮显示将要移动的元素
+        for (let i = insertIndex; i < currentSize; i++) {
+            tempContainer.children[i].classList.add('highlight');
+        }
+
+        // 执行整体移动动画
+        await new Promise(resolve => {
+            for (let i = insertIndex; i < currentSize; i++) {
+                const cell = tempContainer.children[i];
+                cell.style.left = ((i + 1) * 62) + 'px';
+            }
+            setTimeout(resolve, 300);
+        });
+
+        // 移除高亮
+        for (let i = insertIndex; i < currentSize; i++) {
+            tempContainer.children[i].classList.remove('highlight');
+        }
+
+        // 更新数据结构
+        list.splice(insertIndex, 0, value);
+        list.length = maxSize;
+        currentSize++;
+
+        // 重新渲染最终状态
+        renderArray();
+        document.getElementsByClassName('cell')[insertIndex].classList.add('inserted-cell');
+        logOperation(`在位置 ${insertIndex} 插入值：${value}`);
+        traverseList();
+    }
+
+    async function deleteElement() {
+        const deleteIndex = parseInt(document.getElementById('inputIndex').value); // 直接获取输入值
+
+        // 有效性检查调整为 >= currentSize
+        if (deleteIndex < 0 || deleteIndex >= currentSize) {
+            alert('删除位置无效 (有效范围：0-' + (currentSize - 1) + ')');
+            return;
+        }
+
+        if (deleteIndex < 0 || deleteIndex >= currentSize) {
+            alert('删除位置无效');
+            return;
+        }
+
+        const deletedValue = list[deleteIndex];
+
+        // 创建临时容器
+        const tempContainer = document.createElement('div');
+        tempContainer.style.position = 'relative';
+        tempContainer.style.width = (maxSize * 62) + 'px';
+
+        // 克隆当前元素
+        const cells = Array.from(document.getElementsByClassName('cell'));
+        cells.forEach((cell, index) => {
+            const clone = cell.cloneNode(true);
+            clone.style.left = (index * 62) + 'px';
+            tempContainer.appendChild(clone);
+        });
+
+        // 替换显示容器
+        const arrayDisplay = document.getElementById('array-display');
+        arrayDisplay.replaceWith(tempContainer);
+        tempContainer.id = 'array-display';
+
+        // 执行逐个移动动画
+        for (let i = deleteIndex; i < currentSize - 1; i++) {
+            const cell = tempContainer.children[i + 1];
+            cell.classList.add('moving');
+
+            // 创建目标位置指示线
+            const targetLine = document.createElement('div');
+            targetLine.style.position = 'absolute';
+            targetLine.style.left = (i * 62) + 'px';
+            targetLine.style.width = '60px';
+            targetLine.style.height = '40px';
+            targetLine.style.border = '2px dashed #333';
+            tempContainer.appendChild(targetLine);
+
+            await new Promise(resolve => {
+                cell.style.left = (i * 62) + 'px';
+                setTimeout(() => {
+                    targetLine.remove();
+                    resolve();
+                }, 300);
+            });
+
+            cell.classList.remove('moving');
+        }
+
+        // 更新数据结构
+        list.splice(deleteIndex, 1);
+        list.push(null);
+        currentSize--;
+
+        // 重新渲染
+        renderArray();
+        logOperation(`删除位置 ${deleteIndex} 的值：${deletedValue}`);
+        traverseList();
+    }
+
+    async function searchByValue() {
+        const value = document.getElementById('searchValue').value;
+        const cells = document.getElementsByClassName('cell');
+
+        for (let i = 0; i < currentSize; i++) {
+            cells[i].classList.add('highlight');
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            if (list[i] === value) {
+                logOperation(`找到值 ${value} 在位置 ${i + 1}`);
+                cells[i].classList.remove('highlight');
+                return;
+            }
+            cells[i].classList.remove('highlight');
+        }
+
+        logOperation(`未找到值 ${value}`);
+    }
+
+    function searchByIndex() {
+        const index = parseInt(document.getElementById('searchIndex').value); // 直接获取输入值
+
+        if (index >= 0 && index < currentSize) {
+            const cells = document.getElementsByClassName('cell');
+            cells[index].classList.add('highlight');
+            setTimeout(() => cells[index].classList.remove('highlight'), 1000);
+            logOperation(`位置 ${index} 的值为：${list[index]}`);
+        } else {
+            alert('无效的位置');
+        }
+    }
+
+    function modifyElement(index) {
+        if (index >= currentSize) return;
+
+        const newValue = prompt('输入新值：');
+        if (newValue !== null) {
+            list[index] = newValue;
+            renderArray();
+            logOperation(`修改位置 ${index + 1} 的值为：${newValue}`);
+            traverseList();
+        }
+    }
+
+    function traverseList() {
+        const validValues = list.slice(0, currentSize);
+        document.getElementById('traversal').textContent = validValues.join(' → ');
+    }
+
+    function logOperation(message) {
+        const logDiv = document.getElementById('log');
+        logDiv.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${message}</div>`;
+        logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    // 初始化页面
+    document.addEventListener('DOMContentLoaded', function () {
+        initList();  // 确保模板渲染完成后再初始化
+    });
+</script>
+</body>
+</html>
