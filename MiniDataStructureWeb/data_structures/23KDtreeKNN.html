@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>KD树KNN</title>
+    <link rel="stylesheet" href="../js/jquery-3.6.0.js">
+    <link rel="stylesheet" href="../css/maps.css">
+    <link rel="stylesheet" href="../plugins/bootstrap-3.4.1/css/bootstrap.css">
+    <link rel="stylesheet" href="../plugins/font-awesome-4.7.0/css/font-awesome.min.css">
+    
+    <style>
+        .container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .btn-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            margin-top: 6%;
+            text-align: center;
+        }
+
+        .chart {
+            width: 50%;
+            height: 100vh;
+            float: left;
+            position: relative;
+        }
+
+        #scatterchart {
+            width: 80%;
+            height: 40vw;
+            position: absolute;
+            bottom: 50px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 600;
+            background-color: cornflowerblue;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+            color: white;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            filter: brightness(110%);
+        }
+    </style>
+</head>
+<body>
+<div class="side-nav">
+    <a href="../index.html" style="align-items:center;font-size:18px;font-weight:bold;color:#1971c2;text-decoration:none;">
+        <span class="glyphicon glyphicon-home" style="margin-right:10px;"></span>
+        数据结构可视化
+    </a>
+    <ul class="nav" style="list-style:none;">
+        <li><a href="../data_structures/1XianXingBiaoShun.html"><i class="bi bi-list-ul"></i><i class="fa fa-bars"></i> 顺序线性表</a></li>
+        <li><a href="../data_structures/2XianXingBiaoLian.html"><i class="bi bi-link-45deg"></i><i class="fa fa-link"></i> 链式线性表</a></li>
+        <li><a href="../data_structures/3stack.html"><i class="bi bi-stack"></i><i class="fa fa-database"></i> 栈</a></li>
+        <li><a href="../data_structures/4Queue.html"><i class="bi bi-arrow-bar-right"></i><i class="fa fa-random"></i> 队列</a></li>
+        <li><a href="../data_structures/4-1XunHuanQueue.html"><i class="bi bi-arrow-repeat"></i><i class="fa fa-refresh"></i> 循环队列</a></li>
+        <li><a href="../data_structures/5Chuan.html"><i class="bi bi-type"></i><i class="fa fa-font"></i> 串</a></li>
+        <li><a href="../data_structures/6ShuZu.html"><i class="bi bi-grid-3x3-gap"></i><i class="fa fa-table"></i> 数组</a></li>
+        <li><a href="../data_structures/7GuangYiBiao.html"><i class="bi bi-diagram-3"></i><i class="fa fa-sitemap"></i> 广义表</a></li>
+        <li><a href="../data_structures/8Tree.html"><i class="bi bi-tree"></i><i class="fa fa-tree"></i> 树</a></li>
+        <li><a href="../data_structures/9ErTree.html"><i class="bi bi-diagram-2"></i><i class="fa fa-code-fork"></i> 二叉树</a></li>
+        <li><a href="../data_structures/10Tu.html"><i class="bi bi-share"></i><i class="fa fa-share-alt"></i> 图</a></li>
+        <li><a href="../data_structures/11ChaZhao.html"><i class="bi bi-search"></i><i class="fa fa-search-plus"></i> 查找</a></li>
+        <li><a href="../data_structures/12Hash.html"><i class="bi bi-hash"></i><i class="fa fa-hashtag"></i> 哈希表</a></li>
+        <li><a href="../data_structures/13PaiXu.html"><i class="bi bi-sort-numeric-down"></i><i class="fa fa-sort-amount-asc"></i> 排序</a></li>
+        <li><a href="../data_structures/14AVLTree.html"><i class="bi bi-bounding-box"></i><i class="fa fa-balance-scale"></i> AVL树</a></li>
+        <li><a href="../data_structures/15ShenZhanShu.html"><i class="bi bi-arrow-down-up"></i><i class="fa fa-pagelines"></i> 伸展树</a></li>
+        <li><a href="../data_structures/16BTree.html"><i class="bi bi-diagram-3"></i><i class="fa fa-sitemap"></i> B树/B+树</a></li>
+        <li><a href="../data_structures/17ZuoShiDui.html"><i class="bi bi-boxes"></i><i class="fa fa-cubes"></i> 左式堆</a></li>
+        <li><a href="../data_structures/18OuLaHuiLu.html"><i class="bi bi-share"></i><i class="fa fa-share-alt"></i> 欧拉回路</a></li>
+        <li><a href="../data_structures/19ZiDingXiangXiaShenZhanShu.html"><i class="bi bi-arrow-down"></i><i class="fa fa-leaf"></i> 自底向下伸展树</a></li>
+        <li><a href="../data_structures/20HongHeiShu.html"><i class="bi bi-tree"></i><i class="fa fa-tree"></i> 红黑树</a></li>
+        <li><a href="../data_structures/21TreapTree.html"><i class="bi bi-shuffle"></i><i class="fa fa-random"></i> Treap树</a></li>
+        <li><a href="../data_structures/22FHQTree.html"><i class="bi bi-diagram-3"></i><i class="fa fa-sitemap"></i> FHQ Treap</a></li>
+        <li><a href="../data_structures/23KDtreeKNN.html"><i class="bi bi-geo-alt"></i><i class="fa fa-map-marker"></i> KD树/KNN</a></li>
+        <li><a href="../data_structures/24PeiDuiDui.html"><i class="bi bi-boxes"></i><i class="fa fa-cubes"></i> 配对堆</a></li>
+    </ul>
+</div>
+<div class="container">
+    <h2>KD树KNN</h2>
+    <div id="mychart" class="chart" class="chart" style="width:100%;"></div>
+    <div class="chart" style="display: none;">
+        <div id="scatterchart"></div>
+    </div>
+    <div class="btn-container">
+        <button class="btn" onclick="insertToTree()">插入</button>
+        <button class="btn" onclick="rebuild()">重建</button>
+        <button class="btn" onclick="openScatter()">扫描生成图</button>
+    </div>
+</div>
+<script src="../js/echarts.js"></script>
+<script type="text/javascript">
+    "use strict";
+    const container = document.getElementById('mychart');
+    const myChart = echarts.init(container);
+    const scatterChart = echarts.init(document.getElementById('scatterchart'));
+    // treeChart
+    const option = {
+        tooltip: {
+            trigger: 'item',
+            triggerOn: 'mousemove'
+        },
+        series: [
+            {
+                type: 'tree',
+                data: [],
+                left: '2%',
+                right: '2%',
+                top: '12%',
+                bottom: '20%',
+                symbol: 'emptyCircle',
+                orient: 'vertical',
+                expandAndCollapse: true,
+                lineStyle: {
+                    curveness: 0,
+                    color: '#f9d0c4',
+                },
+                initialTreeDepth: -1,
+                // symbolSize:20,
+                label: {
+                    position: 'top',
+                    align: 'middle',
+                    fontSize: 18,
+                    color: '#ddd',
+                    borderWidth: 1,
+                    backgroundColor: '#7b60bc',
+                    padding: [6, 10],
+                    borderRadius: 20,
+                    rich: {
+                        a: {
+                            color: '#fff',
+                            fontSize: 18,
+                            fontWeight: 'bold'
+                        },
+                    }
+                },
+                leaves: {
+                    label: {
+                        position: 'bottom',
+                    }
+                },
+                animationDurationUpdate: 750
+            }
+        ]
+    };
+    const scatterOption = {
+        xAxis: {
+            splitLine: {
+                lineStyle: {
+                    type: 'dashed'
+                }
+            }
+        },
+        yAxis: {
+            splitLine: {
+                lineStyle: {
+                    type: 'dashed'
+                }
+            },
+        },
+        series: [{
+            type: 'effectScatter',
+            symbolSize: 12,
+            emphasis: {
+                label: {
+                    show: true,
+                    color: 'black',
+                    formatter: function (param) {
+                        return param.data.join();
+                    },
+                    position: 'top'
+                }
+            },
+            data: []
+        }, {
+            data: [],
+            type: 'scatter',
+            symbolSize: 12,
+            emphasis: {
+                label: {
+                    show: true,
+                    formatter: function (param) {
+                        return param.data.join();
+                    },
+                    position: 'top'
+                }
+            },
+            itemStyle: {
+                shadowBlur: 10,
+                shadowColor: 'rgba(120, 36, 50, 0.5)',
+                shadowOffsetY: 5,
+                color: new echarts.graphic.RadialGradient(0.4, 0.3, 1, [{
+                    offset: 0,
+                    color: 'rgb(251, 118, 123)'
+                }, {
+                    offset: 1,
+                    color: 'rgb(204, 46, 72)'
+                }])
+            }
+        }, {
+            data: [],
+            type: 'scatter',
+            symbolSize: 12,
+            emphasis: {
+                label: {
+                    show: true,
+                    formatter: function (param) {
+                        return param.data.join();
+                    },
+                    position: 'top'
+                }
+            },
+            itemStyle: {
+                shadowBlur: 10,
+                shadowColor: 'rgba(25, 100, 150, 0.5)',
+                shadowOffsetY: 5,
+                color: new echarts.graphic.RadialGradient(0.4, 0.3, 1, [{
+                    offset: 0,
+                    color: 'rgb(129, 227, 238)'
+                }, {
+                    offset: 1,
+                    color: 'rgb(25, 183, 207)'
+                }])
+            }
+        }],
+        animation: "auto",
+        animationDuration: 1000,
+        animationDurationUpdate: 0,
+        animationEasing: "exponentialOut",
+        animationEasingUpdate: "cubicOut",
+        animationThreshold: 2000
+    };
+    scatterChart.setOption(scatterOption);
+    const NULLNODE = {
+        item: [-Infinity, -Infinity],
+        left: undefined,
+        right: undefined
+    };
+    NULLNODE.left = NULLNODE.right = NULLNODE;
+    function itemCompare(item1, item2, dimension) {
+        if (typeof dimension === 'number') {
+            return item1[dimension] - item2[dimension];
+        }
+        return item1[0] - item2[0] || item1[1] - item2[1];
+    }
+    function isInRange(low, high, item) {
+        return item.every((num, index) => low[index] <= num && num <= high[index]);
+    }
+    class KDTree {
+        constructor(k, data) {
+            this.k = k;
+            this.table = [];
+            this.root = NULLNODE;
+            if (data) {
+                this.table = data;
+                this.build(data);
+            }
+        }
+        build(data) {
+            this.root = this._build(data, 0);
+        }
+        _build(data, dimension) {
+            if (data.length === 0) {
+                return NULLNODE;
+            }
+            data.sort((a, b) => a[dimension] - b[dimension]);
+            let middle = ~~((data.length - 1) / 2);
+            let low = data.slice(0, middle);
+            let high = data.slice(middle + 1, data.length);
+            let node = this.createNode(data[middle]);
+            node.left = this._build(low, this.nextDimension(dimension));
+            node.right = this._build(high, this.nextDimension(dimension));
+            return node;
+        }
+        rebuild() {
+            this.build(this.table);
+        }
+        createNode(item) {
+            return {
+                item,
+                left: NULLNODE,
+                right: NULLNODE
+            };
+        }
+        show(showScatter = true, list) {
+            let data = this.createChartData(this.root, 0, list);
+            option.series[0].data = [{ name: '', children: [data] }];
+            myChart.setOption(option);
+            showScatter && this.showScatter();
+        }
+        createChartData(node, dimension, list) {
+            if (node === NULLNODE) {
+                return { name: '', label: { padding: 0 } };
+            }
+            let arr = node.item.slice(0);
+            arr[dimension] = `{a|${arr[dimension]}}`;
+            let data = {
+                name: `${arr.join(' | ')}`,
+                children: [],
+            };
+            if (list && list.includes(node.item)) {
+                data.label = { backgroundColor: '#dd4444' };
+            }
+            data.children[0] = this.createChartData(node.left, this.nextDimension(dimension), list);
+            data.children[1] = this.createChartData(node.right, this.nextDimension(dimension), list);
+            if (data.children.every(item => item.name === '')) {
+                data.children = [];
+            }
+            return data;
+        }
+        showScatter() {
+            scatterOption.series[2].data = this.table;
+            scatterChart.setOption(scatterOption);
+        }
+        nextDimension(dimension) {
+            return ++dimension % this.k;
+        }
+        insert(item) {
+            this.root = this._insert(item, this.root, 0);
+        }
+        _insert(item, node, dimension) {
+            if (node === NULLNODE) {
+                this.table.push(item);
+                return this.createNode(item);
+            }
+            if (itemCompare(item, node.item, dimension) < 0) {
+                node.left = this._insert(item, node.left, this.nextDimension(dimension));
+            }
+            else {
+                node.right = this._insert(item, node.right, this.nextDimension(dimension));
+            }
+            return node;
+        }
+        range(low, high, callback) {
+            this._range(low, high, 0, this.root, callback);
+        }
+        _range(low, high, dimension, node, callback) {
+            if (node === NULLNODE) {
+                return;
+            }
+            if (isInRange(low, high, node.item)) {
+                callback(node.item);
+            }
+            if (itemCompare(node.item, low, dimension) >= 0) {
+                this._range(low, high, this.nextDimension(dimension), node.left, callback);
+            }
+            if (itemCompare(node.item, high, dimension) <= 0) {
+                this._range(low, high, this.nextDimension(dimension), node.right, callback);
+            }
+        }
+        KNN(item, k = 3) {
+            let list = [];
+            const getDistance = (curItem) => {
+                return Math.sqrt(Math.pow(item[0] - curItem[0], 2) + Math.pow(item[1] - curItem[1], 2));
+            };
+            /* k大的话应该改用优先队列 */
+            const pushToList = (curItem, dimension) => {
+                let listItem = {
+                    item: curItem,
+                    distance: getDistance(curItem)
+                };
+                if (list.length < k) {
+                    list.push(listItem);
+                    list.sort((a, b) => b.distance - a.distance);
+                    return true;
+                }
+                if (listItem.distance <= list[0].distance) {
+                    list[0] = listItem;
+                    list.sort((a, b) => b.distance - a.distance);
+                    return true;
+                }
+                return Math.abs(curItem[dimension] - item[dimension]) <= list[0].distance;
+            };
+            const recusion = (node, dimension) => {
+                if (node === NULLNODE) {
+                    return;
+                }
+                if (itemCompare(item, node.item, dimension) < 0) {
+                    recusion(node.left, this.nextDimension(dimension));
+                    if (pushToList(node.item, dimension)) {
+                        recusion(node.right, this.nextDimension(dimension));
+                    }
+                }
+                else {
+                    recusion(node.right, this.nextDimension(dimension));
+                    if (pushToList(node.item, dimension)) {
+                        recusion(node.left, this.nextDimension(dimension));
+                    }
+                }
+            };
+            recusion(this.root, 0);
+            this.showKNNPoints(list.map((listItem) => listItem.item));
+            return list.map((listItem) => listItem.item);
+        }
+        showKNNPoints(list) {
+            this.show(false, list);
+            let data2 = this.table.slice(0);
+            list.forEach(item => {
+                let idx = data2.indexOf(item);
+                if (idx > -1) {
+                    data2.splice(idx, 1);
+                }
+            });
+            scatterOption.series[0].data = list;
+            scatterOption.series[2].data = data2;
+            scatterChart.setOption(scatterOption);
+        }
+    }
+    let tree;
+    let testcase = [];
+    function two() {
+        testcase = [
+            [53, 14],
+            [27, 28],
+            [67, 50],
+            [30, 11],
+            [31, 85],
+            [79, 3],
+            [99, 90],
+            [29, 16],
+            [40, 26],
+            [7, 39],
+            [32, 29],
+            [82, 64],
+            [38, 23],
+            [15, 61],
+            [73, 75],
+        ];
+        // testcase.reverse()
+        tree = new KDTree(2, testcase);
+        /* for (let item of testcase) {
+            tree.insert(item);
+        } */
+        tree.show();
+    }
+    function three() {
+        testcase = [
+            [3, 1, 4],
+            [2, 3, 7],
+            [4, 3, 4],
+            [2, 1, 3],
+            [2, 4, 5],
+            [6, 1, 4],
+            [1, 4, 4],
+            [0, 5, 7],
+            [5, 2, 5],
+            [4, 0, 6],
+            [7, 1, 6],
+        ];
+        tree = new KDTree(3, testcase);
+        // testcase.reverse()
+        /* for (let item of testcase) {
+            tree.insert(item);
+        } */
+        tree.show();
+    }
+    function random() {
+        testcase = [];
+        for (let i = 0; i < 23; i++) {
+            testcase.push([
+                ~~(Math.random() * 100),
+                ~~(Math.random() * 100),
+            ]);
+        }
+        tree = new KDTree(2);
+        for (let item of testcase) {
+            // tree.insert(item);
+        }
+        tree.show();
+    }
+    // two();
+    // three()
+    random();
+    // tree.range([-Infinity,-Infinity,-Infinity],[Infinity,Infinity,Infinity],(item:Item)=>console.log(item))
+    // tree.range([2, 2, 2], [5, 5, 5], (item: Item) => console.log(item))
+    let idx = 0;
+    function insertToTree() {
+        if (idx < testcase.length) {
+            let item = testcase[idx++].slice(0);
+            tree.insert(item);
+            tree.show();
+        }
+    }
+    function rebuild() {
+        tree.rebuild();
+        tree.show(false);
+    }
+    function openScatter() {
+        container.style.width = '50%';
+        document.getElementById('scatterchart').parentNode.style.display = 'block';
+        myChart.resize();
+        scatterChart.resize();
+    }
+    // openScatter();
+    scatterChart.on('click', 'series', (params) => {
+        tree.KNN(params.data, 4);
+    });
+    //# sourceMappingURL=tree.js.map
+</script>
+</body>
+</html>

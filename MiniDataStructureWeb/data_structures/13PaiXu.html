@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>排序</title>
+    <link rel="stylesheet" href="../js/jquery-3.6.0.js">
+    <link rel="stylesheet" href="../css/maps.css">
+    <link rel="stylesheet" href="../plugins/bootstrap-3.4.1/css/bootstrap.css">
+    <link rel="stylesheet" href="../plugins/font-awesome-4.7.0/css/font-awesome.min.css">
+    
+    <style>
+        .container {
+            float: left;
+        }
+
+        #chart {
+            width: 100%;
+            height: 500px;
+            margin: 20px 0;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+        }
+
+        /* 控制面板现代化 */
+        .control-panel {
+            margin: 20px 0;
+            padding: 25px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+            border: 2px solid #f1f3f5;
+        }
+
+        /* 输入系统升级 */
+        input[type="number"] {
+            padding: 12px 18px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            width: 180px;
+        }
+
+        input[type="number"]:focus {
+            border-color: #74c0fc;
+            box-shadow: 0 0 0 4px rgba(116, 192, 252, 0.15);
+            outline: none;
+        }
+
+        select {
+            padding: 12px 40px 12px 18px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236c757d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 18px;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            transition: all 0.3s ease;
+        }
+
+        select:focus {
+            border-color: #74c0fc;
+            box-shadow: 0 0 0 4px rgba(116, 192, 252, 0.15);
+        }
+
+        /* 按钮系统重构 */
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 600;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+            color: white;
+        }
+
+        #startBtn {
+            background: linear-gradient(135deg, #4dabf7 0%, #228be6 100%);
+        }
+
+        #nextBtn {
+            background: linear-gradient(135deg, #ff922b 0%, #f76707 100%);
+        }
+
+        button[onclick="reset()"] {
+            background: linear-gradient(135deg, #ff6b6b 0%, #fa5252 100%);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            filter: brightness(110%);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 状态信息卡片增强 */
+        .status-info {
+            padding: 20px;
+            margin-top: 25px;
+            background: #fff;
+            border-radius: 12px;
+            border: 2px solid #e9ecef;
+            color: #495057;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
+        }
+
+        .status-info span.meta {
+            color: #40c057;
+            margin-left: 15px;
+            font-weight: 600;
+            padding: 4px 8px;
+            background: #ebfbee;
+            border-radius: 4px;
+        }
+
+        /* 响应式优化 */
+        @media (max-width: 768px) {
+            .container {
+                margin-left: 0;
+                width: 100%;
+                padding: 15px;
+            }
+
+            .control-panel>div {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            input[type="number"],
+            select {
+                width: 100%;
+            }
+
+            button {
+                width: 100%;
+                margin: 5px 0;
+            }
+        }
+
+        /* 保留核心交互样式 */
+        .status-info div:first-child {
+            color: #343a40;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        #status div:first-child {
+            color: #228be6;
+            font-size: 15px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="side-nav">
+    <a href="../index.html" style="align-items:center;font-size:18px;font-weight:bold;color:#1971c2;text-decoration:none;">
+        <span class="glyphicon glyphicon-home" style="margin-right:10px;"></span>
+        数据结构可视化
+    </a>
+    <ul class="nav" style="list-style:none;">
+        <li><a href="../data_structures/1XianXingBiaoShun.html"><i class="bi bi-list-ul"></i><i class="fa fa-bars"></i> 顺序线性表</a></li>
+        <li><a href="../data_structures/2XianXingBiaoLian.html"><i class="bi bi-link-45deg"></i><i class="fa fa-link"></i> 链式线性表</a></li>
+        <li><a href="../data_structures/3stack.html"><i class="bi bi-stack"></i><i class="fa fa-database"></i> 栈</a></li>
+        <li><a href="../data_structures/4Queue.html"><i class="bi bi-arrow-bar-right"></i><i class="fa fa-random"></i> 队列</a></li>
+        <li><a href="../data_structures/4-1XunHuanQueue.html"><i class="bi bi-arrow-repeat"></i><i class="fa fa-refresh"></i> 循环队列</a></li>
+        <li><a href="../data_structures/5Chuan.html"><i class="bi bi-type"></i><i class="fa fa-font"></i> 串</a></li>
+        <li><a href="../data_structures/6ShuZu.html"><i class="bi bi-grid-3x3-gap"></i><i class="fa fa-table"></i> 数组</a></li>
+        <li><a href="../data_structures/7GuangYiBiao.html"><i class="bi bi-diagram-3"></i><i class="fa fa-sitemap"></i> 广义表</a></li>
+        <li><a href="../data_structures/8Tree.html"><i class="bi bi-tree"></i><i class="fa fa-tree"></i> 树</a></li>
+        <li><a href="../data_structures/9ErTree.html"><i class="bi bi-diagram-2"></i><i class="fa fa-code-fork"></i> 二叉树</a></li>
+        <li><a href="../data_structures/10Tu.html"><i class="bi bi-share"></i><i class="fa fa-share-alt"></i> 图</a></li>
+        <li><a href="../data_structures/11ChaZhao.html"><i class="bi bi-search"></i><i class="fa fa-search-plus"></i> 查找</a></li>
+        <li><a href="../data_structures/12Hash.html"><i class="bi bi-hash"></i><i class="fa fa-hashtag"></i> 哈希表</a></li>
+        <li><a href="../data_structures/13PaiXu.html"><i class="bi bi-sort-numeric-down"></i><i class="fa fa-sort-amount-asc"></i> 排序</a></li>
+        <li><a href="../data_structures/14AVLTree.html"><i class="bi bi-bounding-box"></i><i class="fa fa-balance-scale"></i> AVL树</a></li>
+        <li><a href="../data_structures/15ShenZhanShu.html"><i class="bi bi-arrow-down-up"></i><i class="fa fa-pagelines"></i> 伸展树</a></li>
+        <li><a href="../data_structures/16BTree.html"><i class="bi bi-diagram-3"></i><i class="fa fa-sitemap"></i> B树/B+树</a></li>
+        <li><a href="../data_structures/17ZuoShiDui.html"><i class="bi bi-boxes"></i><i class="fa fa-cubes"></i> 左式堆</a></li>
+        <li><a href="../data_structures/18OuLaHuiLu.html"><i class="bi bi-share"></i><i class="fa fa-share-alt"></i> 欧拉回路</a></li>
+        <li><a href="../data_structures/19ZiDingXiangXiaShenZhanShu.html"><i class="bi bi-arrow-down"></i><i class="fa fa-leaf"></i> 自底向下伸展树</a></li>
+        <li><a href="../data_structures/20HongHeiShu.html"><i class="bi bi-tree"></i><i class="fa fa-tree"></i> 红黑树</a></li>
+        <li><a href="../data_structures/21TreapTree.html"><i class="bi bi-shuffle"></i><i class="fa fa-random"></i> Treap树</a></li>
+        <li><a href="../data_structures/22FHQTree.html"><i class="bi bi-diagram-3"></i><i class="fa fa-sitemap"></i> FHQ Treap</a></li>
+        <li><a href="../data_structures/23KDtreeKNN.html"><i class="bi bi-geo-alt"></i><i class="fa fa-map-marker"></i> KD树/KNN</a></li>
+        <li><a href="../data_structures/24PeiDuiDui.html"><i class="bi bi-boxes"></i><i class="fa fa-cubes"></i> 配对堆</a></li>
+    </ul>
+</div>
+<div class="container">
+    <h2>排序</h2>
+
+    <div class="control-panel">
+        <div>
+            <input type="number" id="inputElement" placeholder="输入数字" min="0">
+            <button onclick="addElement()" style="background-color: #228be6;">添加元素</button>
+        </div>
+        <br>
+        <select id="algorithm">
+            <option value="bubble">冒泡排序</option>
+            <option value="quick">快速排序</option>
+            <option value="insertion">直接插入排序</option>
+            <option value="shell">希尔排序</option>
+            <option value="selection">简单选择排序</option>
+            <option value="merge">归并排序</option>
+            <option value="radix">基数排序</option>
+        </select>
+
+        <select id="order">
+            <option value="asc">升序</option>
+            <option value="desc">降序</option>
+        </select>
+
+        <button onclick="startSort()" id="startBtn">开始排序</button>
+        <button onclick="nextStep()" id="nextBtn" disabled>下一步排序对比</button>
+        <button onclick="reset()" style="background:#dc3545">重置</button>
+
+        <div class="status-info">
+            <div id="status">当前状态：等待输入</div>
+            <div style="margin-top: 10px">
+                <span style="color: #17a2b8">比较次数：<span id="compareCount">0</span></span>
+                <span style="margin-left: 15px; color: #dc3545">交换次数：<span id="swapCount">0</span></span>
+            </div>
+        </div>
+    </div>
+
+    <div id="chart"></div>
+</div>
+<script src="../js/echarts.js"></script>
+<script>
+    let myChart = echarts.init(document.getElementById('chart'));
+    let dataArray = [];
+    let currentStep = null;
+    let isSorting = false;
+    let sortGenerator = null;
+    let originalArray = [];//原始数组变量
+
+    // 全局统计变量
+    let compareCount = 0;
+    let swapCount = 0;
+
+    // ECharts配置
+    let option = {
+        xAxis: [{
+            type: 'category',
+            data: []
+        }],
+        yAxis: [{
+            type: 'value'
+        }],
+        series: [{
+            data: [],
+            type: 'bar',
+            label: {
+                show: true,
+                position: 'top',
+                color: '#333',
+                fontSize: 14
+            },
+            itemStyle: {
+                color: '#007bff'
+            }
+        }]
+    };
+
+    // 初始化图表
+    myChart.setOption(option);
+
+    function updateChart(highlightIndices = []) {
+        let colors = dataArray.map((_, index) =>
+            highlightIndices.includes(index) ? '#ff4d4d' : '#007bff'
+        );
+        option.xAxis[0].data = dataArray.map((_, i) => i.toString());
+        option.series[0].data = dataArray.map(val => ({
+            value: val,
+            itemStyle: { color: null },
+            label: { show: true }  // 显示数值标签
+        }));
+
+        option.series[0].itemStyle.color = params => colors[params.dataIndex];
+        myChart.setOption(option);
+    }
+
+    //冒泡排序
+    function* bubbleSort(arr, order) {
+        compareCount = 0;
+        swapCount = 0;
+        let n = arr.length;
+        for (let i = 0; i < n - 1; i++) {
+            for (let j = 0; j < n - i - 1; j++) {
+                // 比较计数
+                compareCount++;
+                let shouldSwap = order === 'asc' ? arr[j] > arr[j + 1] : arr[j] < arr[j + 1];
+                yield {
+                    highlight: [j, j + 1], desc: `比较 ${arr[j]} 和 ${arr[j + 1]}`,
+                    compareCount, swapCount
+                };
+
+                if (shouldSwap) {
+                    // 交换计数
+                    swapCount++;
+                    [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+                    yield {
+                        highlight: [j, j + 1], desc: `交换 ${arr[j + 1]} 和 ${arr[j]}`,
+                        compareCount, swapCount
+                    };
+                }
+            }
+        }
+    }
+    //快速排序
+    function* quickSort(arr, order) {
+        compareCount = 0;
+        swapCount = 0;
+
+        function* partition(low, high) {
+            let pivot = arr[high];
+            let i = low - 1;
+
+            for (let j = low; j < high; j++) {
+                compareCount++;
+                let shouldSwap = order === 'asc' ? arr[j] <= pivot : arr[j] >= pivot;
+                yield { highlight: [j, high], desc: `比较 ${arr[j]} 和 ${pivot}`, compareCount, swapCount };
+
+                if (shouldSwap) {
+                    i++;
+                    swapCount++;
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                    if (i !== j) yield { highlight: [i, j], desc: `交换 ${arr[j]} 和 ${arr[i]}`, compareCount, swapCount };
+                }
+            }
+
+            swapCount++;
+            [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];
+            yield { highlight: [i + 1, high], desc: `移动基准到正确位置`, compareCount, swapCount };
+            return i + 1;
+        }
+
+        let stack = [[0, arr.length - 1]];
+        while (stack.length) {
+            let [low, high] = stack.pop();
+            if (low >= high) continue;
+
+            let partitionGen = partition(low, high);
+            let result;
+            while (!(result = partitionGen.next()).done) {
+                yield result.value;
+            }
+            let pivotIdx = result.value;
+
+            stack.push([pivotIdx + 1, high]);
+            stack.push([low, pivotIdx - 1]);
+        }
+    }
+
+    // 插入排序
+    function* insertionSort(arr, order) {
+        compareCount = 0;
+        swapCount = 0;
+
+        for (let i = 1; i < arr.length; i++) {
+            let key = arr[i];
+            let j = i - 1;
+
+            while (j >= 0) {
+                compareCount++;
+                let shouldMove = order === 'asc' ? arr[j] > key : arr[j] < key;
+                yield { highlight: [j, i], desc: `比较 ${arr[j]} 和 ${key}`, compareCount, swapCount };
+
+                if (shouldMove) {
+                    swapCount++;
+                    arr[j + 1] = arr[j];
+                    j--;
+                    yield { highlight: [j + 1], desc: `移动 ${arr[j + 1]}`, compareCount, swapCount };
+                } else {
+                    break;
+                }
+            }
+            arr[j + 1] = key;
+            yield { highlight: [j + 1], desc: `插入 ${key} 到位置 ${j + 1}`, compareCount, swapCount };
+        }
+    }
+
+    // 希尔排序
+    function* shellSort(arr, order) {
+        compareCount = 0;
+        swapCount = 0;
+        let n = arr.length;
+
+        for (let gap = Math.floor(n / 2); gap > 0; gap = Math.floor(gap / 2)) {
+            yield { highlight: [], desc: `新间隔：${gap}`, meta: { gap }, compareCount, swapCount };
+
+            for (let i = gap; i < n; i++) {
+                let temp = arr[i];
+                let j;
+                for (j = i; j >= gap; j -= gap) {
+                    compareCount++;
+                    let shouldSwap = order === 'asc' ? arr[j - gap] > temp : arr[j - gap] < temp;
+                    yield { highlight: [j - gap, j], desc: `比较 ${arr[j - gap]} 和 ${temp}`, meta: { gap }, compareCount, swapCount };
+
+                    if (shouldSwap) {
+                        swapCount++;
+                        arr[j] = arr[j - gap];
+                        yield { highlight: [j], desc: `移动 ${arr[j]}`, meta: { gap }, compareCount, swapCount };
+                    } else {
+                        break;
+                    }
+                }
+                arr[j] = temp;
+                if (j !== i) yield { highlight: [j], desc: `插入 ${temp}`, meta: { gap }, compareCount, swapCount };
+            }
+        }
+    }
+
+    // 选择排序
+    function* selectionSort(arr, order) {
+        compareCount = 0;
+        swapCount = 0;
+        let n = arr.length;
+
+        for (let i = 0; i < n - 1; i++) {
+            let extremeIndex = i;
+            yield { highlight: [extremeIndex], desc: `当前极值：${arr[extremeIndex]}`, meta: { extremeIndex }, compareCount, swapCount };
+
+            for (let j = i + 1; j < n; j++) {
+                compareCount++;
+                let shouldUpdate = order === 'asc' ? arr[j] < arr[extremeIndex] : arr[j] > arr[extremeIndex];
+                yield { highlight: [extremeIndex, j], desc: `比较 ${arr[j]} 和 ${arr[extremeIndex]}`, meta: { extremeIndex }, compareCount, swapCount };
+
+                if (shouldUpdate) {
+                    extremeIndex = j;
+                    yield { highlight: [extremeIndex], desc: `新极值：${arr[extremeIndex]}`, meta: { extremeIndex }, compareCount, swapCount };
+                }
+            }
+
+            if (extremeIndex !== i) {
+                swapCount++;
+                [arr[i], arr[extremeIndex]] = [arr[extremeIndex], arr[i]];
+                yield { highlight: [i, extremeIndex], desc: `交换 ${arr[i]} 和 ${arr[extremeIndex]}`, compareCount, swapCount };
+            }
+        }
+    }
+
+    // 归并排序
+    function* mergeSort(arr, order) {
+        compareCount = 0;
+        swapCount = 0;
+
+        function* merge(low, mid, high) {
+            let left = arr.slice(low, mid + 1);
+            let right = arr.slice(mid + 1, high + 1);
+            let i = 0, j = 0, k = low;
+
+            while (i < left.length && j < right.length) {
+                compareCount++;
+                let shouldTakeLeft = order === 'asc' ? left[i] <= right[j] : left[i] >= right[j];
+                yield { highlight: [low + i, mid + 1 + j], desc: `比较 ${left[i]} 和 ${right[j]}`, compareCount, swapCount };
+
+                if (shouldTakeLeft) {
+                    arr[k] = left[i++];
+                } else {
+                    arr[k] = right[j++];
+                }
+                k++;
+            }
+
+            while (i < left.length) arr[k++] = left[i++];
+            while (j < right.length) arr[k++] = right[j++];
+        }
+
+        let currSize = 1;
+        while (currSize < arr.length) {
+            let low = 0;
+            while (low < arr.length) {
+                let mid = Math.min(low + currSize - 1, arr.length - 1);
+                let high = Math.min(low + 2 * currSize - 1, arr.length - 1);
+                yield* merge(low, mid, high);
+                low += 2 * currSize;
+            }
+            currSize *= 2;
+        }
+    }
+
+    // 基数排序
+    function* radixSort(arr, order) {
+        compareCount = 0;  // 基数排序没有传统比较
+        swapCount = 0;
+
+        const maxNum = Math.max(...arr.map(num => Math.abs(num)));
+        const maxDigit = maxNum === 0 ? 1 : String(maxNum).length;
+
+        for (let digit = 0; digit < maxDigit; digit++) {
+            const buckets = Array.from({ length: 10 }, () => []);
+            const base = Math.pow(10, digit);
+
+            // 分配阶段
+            for (let i = 0; i < arr.length; i++) {
+                const num = arr[i];
+                const digitValue = Math.floor(Math.abs(num) / base) % 10;
+                buckets[digitValue].push(num);
+                yield {
+                    highlight: [i],
+                    desc: `分配 ${num} 到桶 ${digitValue}`,
+                    compareCount,
+                    swapCount: ++swapCount  // 每个分配操作视为交换
+                };
+            }
+
+            // 收集阶段
+            let index = 0;
+            const direction = order === 'asc' ? 1 : -1;
+            const start = order === 'asc' ? 0 : 9;
+            const end = order === 'asc' ? 10 : -1;
+
+            for (let b = start; b !== end; b += direction) {
+                for (const num of buckets[b]) {
+                    arr[index++] = num;
+                    yield {
+                        highlight: [index - 1],
+                        desc: `从桶 ${b} 收集 ${num}`,
+                        compareCount,
+                        swapCount: ++swapCount  // 每个收集操作视为交换
+                    };
+                }
+            }
+        }
+    }
+
+    // 排序验证函数
+    function checkSorted(arr, order) {
+        for (let i = 1; i < arr.length; i++) {
+            if (order === 'asc' && arr[i - 1] > arr[i]) return false;
+            if (order === 'desc' && arr[i - 1] < arr[i]) return false;
+        }
+        return true;
+    }
+
+    function startSort() {
+        if (dataArray.length < 1) return;
+        isSorting = true;
+        document.getElementById('nextBtn').disabled = false;
+        // 每次开始排序时创建副本
+        const workingArray = [...dataArray];
+        const algorithm = document.getElementById('algorithm').value;
+        const order = document.getElementById('order').value;
+
+        switch (algorithm) {
+            case 'bubble':
+                sortGenerator = bubbleSort(workingArray, order);
+                break;
+            case 'quick':
+                sortGenerator = quickSort(workingArray, order);
+                break;
+            case 'insertion':
+                sortGenerator = insertionSort(workingArray, order);
+                break;
+            case 'shell':
+                sortGenerator = shellSort(workingArray, order);
+                break;
+            case 'selection':
+                sortGenerator = selectionSort(workingArray, order);
+                break;
+            case 'merge':
+                sortGenerator = mergeSort(workingArray, order);
+                break;
+            case 'radix':
+                sortGenerator = radixSort(workingArray, order);
+                break;
+        }
+        // 添加数组同步逻辑
+        const updateData = () => dataArray = workingArray;
+        const originalNext = sortGenerator.next;
+        sortGenerator.next = function (...args) {
+            const result = originalNext.apply(this, args);
+            updateData();
+            return result;
+        }
+    }
+
+    function nextStep() {
+        if (!isSorting || !sortGenerator) return;
+
+        let result = sortGenerator.next();
+        if (!result.done) {
+            document.getElementById('compareCount').textContent = result.value.compareCount || 0;
+            document.getElementById('swapCount').textContent = result.value.swapCount || 0;
+            updateChart(result.value.highlight);
+
+            // 构建状态信息
+            let statusText = `当前状态：${result.value.desc}`;
+            let metaHtml = '';
+            if (result.value.meta) {
+                const meta = result.value.meta;
+                metaHtml = Object.entries(meta)
+                    .map(([key, value]) => {
+                        if (key === 'mergeRange') {
+                            return `<span class="meta">合并范围：${value.low}-${value.high}</span>`;
+                        }
+                        return `<span class="meta">${key}: ${value}</span>`;
+                    })
+                    .join('');
+            }
+            document.getElementById('status').innerHTML = `
+                <div>当前操作：${result.value.desc}</div>
+                <div>${metaHtml}</div>
+            `;
+        } else {
+            isSorting = false;
+            document.getElementById('nextBtn').disabled = true;
+            document.getElementById('status').innerText = '当前状态：排序完成';
+            document.getElementById('compareCount').textContent = compareCount;
+            document.getElementById('swapCount').textContent = swapCount;
+        }
+    }
+
+    function addElement() {
+        let input = document.getElementById('inputElement');
+        let value = parseInt(input.value);
+        if (!isNaN(value)) {
+            dataArray.push(value);
+            originalArray.push(value); // 同时更新原始数组
+            updateChart();
+            input.value = '';
+        }
+    }
+
+    function reset() {
+        // 保留元素，恢复原始顺序
+        dataArray = [...originalArray]; // 使用扩展运算符创建副本
+        isSorting = false;
+        sortGenerator = null;
+        document.getElementById('nextBtn').disabled = true;
+        document.getElementById('status').innerText = '当前状态：已重置';
+        // 重置统计
+        compareCount = 0;
+        swapCount = 0;
+        document.getElementById('compareCount').textContent = '0';
+        document.getElementById('swapCount').textContent = '0';
+        updateChart();
+    }
+</script>
+</body>
+</html>

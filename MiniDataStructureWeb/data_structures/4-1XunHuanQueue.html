@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>循环队列</title>
+    <link rel="stylesheet" href="../js/jquery-3.6.0.js">
+    <link rel="stylesheet" href="../css/maps.css">
+    <link rel="stylesheet" href="../plugins/bootstrap-3.4.1/css/bootstrap.css">
+    <link rel="stylesheet" href="../plugins/font-awesome-4.7.0/css/font-awesome.min.css">
+    
+    <style>
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        #queue-container {
+            width: 420px;
+            height: 420px;
+            position: relative;
+            border: 3px solid #2d3436;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            margin: 30px 0;
+        }
+
+        .queue-item {
+            width: 48px;
+            height: 48px;
+            border: 3px solid #4CAF50;
+            border-radius: 50%;
+            position: absolute;
+            background: #fff;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-left: -24px;
+            margin-top: -24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #2d3436;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .pointer {
+            color: #ff6b6b;
+            font-weight: 700;
+            position: absolute;
+            font-size: 14px;
+            text-shadow: 0 2px 4px rgba(255, 107, 107, 0.2);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 50px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 600px;
+        }
+
+        .status {
+            margin-top: 30px;
+            padding: 20px 30px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            background: #fff;
+            width: 80%;
+            max-width: 600px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        /* 按钮优化 */
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 600;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+            min-width: 120px;
+        }
+
+        button:nth-child(2) { /* 入队按钮 */
+            background: linear-gradient(135deg, #40c057 0%, #2f9e44 100%);
+            color: white;
+        }
+
+        button:nth-child(3) { /* 出队按钮 */
+            background: linear-gradient(135deg, #ff6b6b 0%, #f03e3e 100%);
+            color: white;
+        }
+
+        button:nth-child(4), /* 设置大小按钮 */
+        button:nth-child(5) { /* 清除按钮 */
+            background: linear-gradient(135deg, #4dabf7 0%, #228be6 100%);
+            color: white;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            filter: brightness(110%);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 输入框优化 */
+        input[type="number"] {
+            padding: 12px 16px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: white;
+            color: #2d3436;
+            width: 140px;
+        }
+
+        input:focus {
+            border-color: #74c0fc;
+            box-shadow: 0 0 0 4px rgba(116, 192, 252, 0.15);
+            outline: none;
+        }
+
+        input::placeholder {
+            color: #adb5bd;
+            font-style: italic;
+        }
+
+        /* 状态信息样式 */
+        #status {
+            font-family: 'Courier New', monospace;
+            color: #495057;
+            line-height: 1.6;
+        }
+
+        #status::before {
+            content: "📊 ";
+            margin-right: 8px;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            #queue-container {
+                width: 300px;
+                height: 300px;
+            }
+
+            .queue-item {
+                width: 36px;
+                height: 36px;
+                font-size: 14px;
+            }
+
+            .controls {
+                margin-top: 400px;
+                gap: 10px;
+            }
+
+            button {
+                min-width: 100px;
+                padding: 10px 16px;
+            }
+
+            input[type="number"] {
+                width: 120px;
+            }
+
+            .status {
+                width: 90%;
+                padding: 15px 20px;
+            }
+        }
+
+        /* 保留原有关键样式 */
+        .queue-item.highlight {
+            background: #ffe066 !important;
+            box-shadow: 0 0 20px rgba(255, 193, 7, 0.3);
+        }
+
+        .queue-item.full {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+<div class="side-nav">
+    <a href="../index.html" style="align-items:center;font-size:18px;font-weight:bold;color:#1971c2;text-decoration:none;">
+        <span class="glyphicon glyphicon-home" style="margin-right:10px;"></span>
+        数据结构可视化
+    </a>
+    <ul class="nav" style="list-style:none;">
+        <li><a href="../data_structures/1XianXingBiaoShun.html"><i class="bi bi-list-ul"></i><i class="fa fa-bars"></i> 顺序线性表</a></li>
+        <li><a href="../data_structures/2XianXingBiaoLian.html"><i class="bi bi-link-45deg"></i><i class="fa fa-link"></i> 链式线性表</a></li>
+        <li><a href="../data_structures/3stack.html"><i class="bi bi-stack"></i><i class="fa fa-database"></i> 栈</a></li>
+        <li><a href="../data_structures/4Queue.html"><i class="bi bi-arrow-bar-right"></i><i class="fa fa-random"></i> 队列</a></li>
+        <li><a href="../data_structures/4-1XunHuanQueue.html"><i class="bi bi-arrow-repeat"></i><i class="fa fa-refresh"></i> 循环队列</a></li>
+        <li><a href="../data_structures/5Chuan.html"><i class="bi bi-type"></i><i class="fa fa-font"></i> 串</a></li>
+        <li><a href="../data_structures/6ShuZu.html"><i class="bi bi-grid-3x3-gap"></i><i class="fa fa-table"></i> 数组</a></li>
+        <li><a href="../data_structures/7GuangYiBiao.html"><i class="bi bi-diagram-3"></i><i class="fa fa-sitemap"></i> 广义表</a></li>
+        <li><a href="../data_structures/8Tree.html"><i class="bi bi-tree"></i><i class="fa fa-tree"></i> 树</a></li>
+        <li><a href="../data_structures/9ErTree.html"><i class="bi bi-diagram-2"></i><i class="fa fa-code-fork"></i> 二叉树</a></li>
+        <li><a href="../data_structures/10Tu.html"><i class="bi bi-share"></i><i class="fa fa-share-alt"></i> 图</a></li>
+        <li><a href="../data_structures/11ChaZhao.html"><i class="bi bi-search"></i><i class="fa fa-search-plus"></i> 查找</a></li>
+        <li><a href="../data_structures/12Hash.html"><i class="bi bi-hash"></i><i class="fa fa-hashtag"></i> 哈希表</a></li>
+        <li><a href="../data_structures/13PaiXu.html"><i class="bi bi-sort-numeric-down"></i><i class="fa fa-sort-amount-asc"></i> 排序</a></li>
+        <li><a href="../data_structures/14AVLTree.html"><i class="bi bi-bounding-box"></i><i class="fa fa-balance-scale"></i> AVL树</a></li>
+        <li><a href="../data_structures/15ShenZhanShu.html"><i class="bi bi-arrow-down-up"></i><i class="fa fa-pagelines"></i> 伸展树</a></li>
+        <li><a href="../data_structures/16BTree.html"><i class="bi bi-diagram-3"></i><i class="fa fa-sitemap"></i> B树/B+树</a></li>
+        <li><a href="../data_structures/17ZuoShiDui.html"><i class="bi bi-boxes"></i><i class="fa fa-cubes"></i> 左式堆</a></li>
+        <li><a href="../data_structures/18OuLaHuiLu.html"><i class="bi bi-share"></i><i class="fa fa-share-alt"></i> 欧拉回路</a></li>
+        <li><a href="../data_structures/19ZiDingXiangXiaShenZhanShu.html"><i class="bi bi-arrow-down"></i><i class="fa fa-leaf"></i> 自底向下伸展树</a></li>
+        <li><a href="../data_structures/20HongHeiShu.html"><i class="bi bi-tree"></i><i class="fa fa-tree"></i> 红黑树</a></li>
+        <li><a href="../data_structures/21TreapTree.html"><i class="bi bi-shuffle"></i><i class="fa fa-random"></i> Treap树</a></li>
+        <li><a href="../data_structures/22FHQTree.html"><i class="bi bi-diagram-3"></i><i class="fa fa-sitemap"></i> FHQ Treap</a></li>
+        <li><a href="../data_structures/23KDtreeKNN.html"><i class="bi bi-geo-alt"></i><i class="fa fa-map-marker"></i> KD树/KNN</a></li>
+        <li><a href="../data_structures/24PeiDuiDui.html"><i class="bi bi-boxes"></i><i class="fa fa-cubes"></i> 配对堆</a></li>
+    </ul>
+</div>
+<h2>循环队列</h2>
+<div class="container">
+    <div id="queue-container"></div>
+    <div class="controls">
+        <input type="number" id="value" placeholder="输入数值" min="1">
+        <button onclick="enqueue()">入队</button>
+        <button onclick="dequeue()">出队</button>
+        <div style="margin-left: 30px;">
+            <input type="number" id="queueSize" placeholder="队列大小" min="2" value="8" style="width: 100px;">
+            <button onclick="changeQueueSize()">设置大小</button>
+        </div>
+        <button onclick="initQueue()">清除队列元素</button>
+    </div>
+
+    <div class="status" id="status"></div>
+</div>
+<script src="../js/echarts.js"></script>
+<script>
+    let MAXSIZE = 8;
+
+    function changeQueueSize() {
+        const newSize = parseInt(document.getElementById('queueSize').value);
+        if (newSize < 2) {
+            alert("队列大小至少为2");
+            return;
+        }
+        MAXSIZE = newSize;
+        initQueue();
+    }
+
+    function initQueue() {
+        queue = {
+            front: 0,
+            rear: 0,
+            items: new Array(MAXSIZE).fill(null)
+        };
+        updateVisualization();
+        updateStatus();
+    }
+
+    function isFull() {
+        return (queue.rear + 1) % MAXSIZE === queue.front;
+    }
+
+    function isEmpty() {
+        return queue.front === queue.rear;
+    }
+
+    function enqueue() {
+        if (isFull()) {
+            alert("队列已满！");
+            return;
+        }
+        const value = document.getElementById('value').value;
+        if (!value) {
+            alert("请输入有效数值");
+            return;
+        }
+        queue.items[queue.rear] = value;
+        queue.rear = (queue.rear + 1) % MAXSIZE;
+        updateVisualization();
+        updateStatus();
+    }
+
+    function dequeue() {
+        if (isEmpty()) {
+            alert("队列已空！");
+            return;
+        }
+        queue.items[queue.front] = null;
+        queue.front = (queue.front + 1) % MAXSIZE;
+        updateVisualization();
+        updateStatus();
+    }
+
+    function calculatePosition(index) {
+        const angle = (index * 360 / MAXSIZE - 90) * Math.PI / 180;
+        const radius = Math.min(150, 200 - 20*MAXSIZE/8); // 动态调整半径
+        return {
+            x: 200 + radius * Math.cos(angle),
+            y: 200 + radius * Math.sin(angle)
+        };
+    }
+
+    function updateVisualization() {
+        const container = document.getElementById('queue-container');
+        container.innerHTML = '';
+
+        // 创建队列元素
+        for (let i = 0; i < MAXSIZE; i++) {
+            const pos = calculatePosition(i);
+            const item = document.createElement('div');
+            item.className = 'queue-item';
+            item.style.left = pos.x + 'px';
+            item.style.top = pos.y + 'px';
+            item.textContent = queue.items[i] || '';
+
+            // 标记队头队尾
+            if (i === queue.front) {
+                const frontPointer = document.createElement('div');
+                frontPointer.className = 'pointer';
+                frontPointer.style.left = pos.x + 20 + 'px';
+                frontPointer.style.top = pos.y - 10 + 'px'; // 调整位置，使其位于小圆上方
+                frontPointer.style.zIndex = 1; // 确保标记显示在小圆的上方
+                frontPointer.textContent = 'Front';
+                container.appendChild(frontPointer);
+            }
+
+            if (i === queue.rear) {
+                const rearPointer = document.createElement('div');
+                rearPointer.className = 'pointer';
+                rearPointer.style.left = pos.x + 20 + 'px';
+                rearPointer.style.top = pos.y - 10 + 'px'; // 调整位置，使其位于小圆上方
+                rearPointer.style.zIndex = 1; // 确保标记显示在小圆的上方
+                rearPointer.textContent = 'Rear';
+                container.appendChild(rearPointer);
+            }
+
+            container.appendChild(item);
+        }
+    }
+
+    function updateStatus() {
+        const status = document.getElementById('status');
+        status.innerHTML = `
+            队列状态：${isEmpty() ? '空' : isFull() ? '满' : '正常'} |
+            队头位置：${queue.front} |
+            队尾位置：${queue.rear} |
+            元素数量：${(queue.rear - queue.front + MAXSIZE) % MAXSIZE}
+        `;
+    }
+
+    // 初始化
+    initQueue();
+</script>
+</body>
+</html>

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>自底向下伸展树</title>
+    <link rel="stylesheet" href="../js/jquery-3.6.0.js">
+    <link rel="stylesheet" href="../css/maps.css">
+    <link rel="stylesheet" href="../plugins/bootstrap-3.4.1/css/bootstrap.css">
+    <link rel="stylesheet" href="../plugins/font-awesome-4.7.0/css/font-awesome.min.css">
+    <style>
+        .container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .btn-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            margin-top: 6%;
+            text-align: center;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 600;
+            background-color: cornflowerblue;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+            color: white;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            filter: brightness(110%);
+        }
+    </style>
+</head>
+<body>
+<div class="side-nav">
+    <a href="../index.html" style="align-items:center;font-size:18px;font-weight:bold;color:#1971c2;text-decoration:none;">
+        <span class="glyphicon glyphicon-home" style="margin-right:10px;"></span>
+        数据结构可视化
+    </a>
+    <ul class="nav" style="list-style:none;">
+        <li><a href="../data_structures/1XianXingBiaoShun.html"><i class="bi bi-list-ul"></i><i class="fa fa-bars"></i> 顺序线性表</a></li>
+        <li><a href="../data_structures/2XianXingBiaoLian.html"><i class="bi bi-link-45deg"></i><i class="fa fa-link"></i> 链式线性表</a></li>
+        <li><a href="../data_structures/3stack.html"><i class="bi bi-stack"></i><i class="fa fa-database"></i> 栈</a></li>
+        <li><a href="../data_structures/4Queue.html"><i class="bi bi-arrow-bar-right"></i><i class="fa fa-random"></i> 队列</a></li>
+        <li><a href="../data_structures/4-1XunHuanQueue.html"><i class="bi bi-arrow-repeat"></i><i class="fa fa-refresh"></i> 循环队列</a></li>
+        <li><a href="../data_structures/5Chuan.html"><i class="bi bi-type"></i><i class="fa fa-font"></i> 串</a></li>
+        <li><a href="../data_structures/6ShuZu.html"><i class="bi bi-grid-3x3-gap"></i><i class="fa fa-table"></i> 数组</a></li>
+        <li><a href="../data_structures/7GuangYiBiao.html"><i class="bi bi-diagram-3"></i><i class="fa fa-sitemap"></i> 广义表</a></li>
+        <li><a href="../data_structures/8Tree.html"><i class="bi bi-tree"></i><i class="fa fa-tree"></i> 树</a></li>
+        <li><a href="../data_structures/9ErTree.html"><i class="bi bi-diagram-2"></i><i class="fa fa-code-fork"></i> 二叉树</a></li>
+        <li><a href="../data_structures/10Tu.html"><i class="bi bi-share"></i><i class="fa fa-share-alt"></i> 图</a></li>
+        <li><a href="../data_structures/11ChaZhao.html"><i class="bi bi-search"></i><i class="fa fa-search-plus"></i> 查找</a></li>
+        <li><a href="../data_structures/12Hash.html"><i class="bi bi-hash"></i><i class="fa fa-hashtag"></i> 哈希表</a></li>
+        <li><a href="../data_structures/13PaiXu.html"><i class="bi bi-sort-numeric-down"></i><i class="fa fa-sort-amount-asc"></i> 排序</a></li>
+        <li><a href="../data_structures/14AVLTree.html"><i class="bi bi-bounding-box"></i><i class="fa fa-balance-scale"></i> AVL树</a></li>
+        <li><a href="../data_structures/15ShenZhanShu.html"><i class="bi bi-arrow-down-up"></i><i class="fa fa-pagelines"></i> 伸展树</a></li>
+        <li><a href="../data_structures/16BTree.html"><i class="bi bi-diagram-3"></i><i class="fa fa-sitemap"></i> B树/B+树</a></li>
+        <li><a href="../data_structures/17ZuoShiDui.html"><i class="bi bi-boxes"></i><i class="fa fa-cubes"></i> 左式堆</a></li>
+        <li><a href="../data_structures/18OuLaHuiLu.html"><i class="bi bi-share"></i><i class="fa fa-share-alt"></i> 欧拉回路</a></li>
+        <li><a href="../data_structures/19ZiDingXiangXiaShenZhanShu.html"><i class="bi bi-arrow-down"></i><i class="fa fa-leaf"></i> 自底向下伸展树</a></li>
+        <li><a href="../data_structures/20HongHeiShu.html"><i class="bi bi-tree"></i><i class="fa fa-tree"></i> 红黑树</a></li>
+        <li><a href="../data_structures/21TreapTree.html"><i class="bi bi-shuffle"></i><i class="fa fa-random"></i> Treap树</a></li>
+        <li><a href="../data_structures/22FHQTree.html"><i class="bi bi-diagram-3"></i><i class="fa fa-sitemap"></i> FHQ Treap</a></li>
+        <li><a href="../data_structures/23KDtreeKNN.html"><i class="bi bi-geo-alt"></i><i class="fa fa-map-marker"></i> KD树/KNN</a></li>
+        <li><a href="../data_structures/24PeiDuiDui.html"><i class="bi bi-boxes"></i><i class="fa fa-cubes"></i> 配对堆</a></li>
+    </ul>
+</div>
+<div class="container">
+    <h2>自底向下伸展树</h2>
+    <div class="btn-container">
+        <button class="btn" onclick="insertToTree()">插入</button>
+        <button class="btn" onclick="deleteFromTree()">删除</button>
+    </div>
+    <div id="mychart" style="height: 100vh"></div>
+</div>
+<script src="../static/js/echarts.js"></script>
+<script type="text/javascript">
+    "use strict";
+    const container = document.getElementById('mychart');
+    const myChart = echarts.init(container);
+    const option = {
+        tooltip: {
+            trigger: 'item',
+            triggerOn: 'mousemove'
+        },
+        series: [
+            {
+                type: 'tree',
+                // data: [data],
+                data: [],
+                left: '2%',
+                right: '2%',
+                top: '8%',
+                bottom: '20%',
+                symbol: 'emptyCircle',
+                orient: 'vertical',
+                expandAndCollapse: true,
+                lineStyle: {
+                    curveness: 0,
+                },
+                initialTreeDepth: -1,
+                // symbolSize:1,
+                label: {
+                    normal: {
+                        position: 'top',
+                        align: 'middle',
+                        fontSize: 19,
+                        color: '#111',
+                        borderWidth: 2,
+                        borderColor: '#b03a5b',
+                        borderRadius: 100,
+                        width: 30,
+                        height: 30,
+                        lineHeight: 30,
+                        rich: {}
+                    }
+                },
+                leaves: {
+                    label: {
+                        normal: {
+                            position: 'bottom',
+                            align: 'middle'
+                        }
+                    }
+                },
+                animationDurationUpdate: 750
+            }
+        ]
+    };
+    function itemCompare(item1, item2) {
+        return item1.num - item2.num;
+    }
+    class BinaryTree {
+        constructor() {
+            this.size = 0;
+            this.root = null;
+        }
+        createNode(item) {
+            return {
+                item,
+                left: null,
+                right: null
+            };
+        }
+        addItem(item) {
+            let newNode = this.createNode(item);
+            this.root = this._addItem(this.root, newNode);
+            this.size++;
+        }
+        _addItem(node, newNode) {
+            if (!node) {
+                return newNode;
+            }
+            let dir = itemCompare(node.item, newNode.item);
+            if (dir > 0) {
+                node.left = this._addItem(node.left, newNode);
+            }
+            else if (dir < 0) {
+                node.right = this._addItem(node.right, newNode);
+            }
+            else {
+                console.warn('same item');
+                this.size--;
+            }
+            return node;
+        }
+        traverseByLevel(callback) {
+            if (!this.root) {
+                return;
+            }
+            this._traverseByLevel([this.root, null], callback);
+        }
+        _traverseByLevel(nodes, callback) {
+            if (!nodes.length) {
+                return;
+            }
+            let arr = [];
+            nodes.forEach((node) => {
+                callback(node && node.item);
+                if (node) {
+                    if (node.left) {
+                        arr.push(node.left);
+                    }
+                    if (node.right) {
+                        arr.push(node.right);
+                    }
+                }
+            });
+            if (arr.length) {
+                arr.push(null);
+                this._traverseByLevel(arr, callback);
+            }
+        }
+        createChartData(node) {
+            if (!node) {
+                return { name: '' };
+            }
+            let data = {
+                name: '' + node.item.num,
+                children: []
+            };
+            data.children[0] = this.createChartData(node.left);
+            data.children[1] = this.createChartData(node.right);
+            if (data.children.every(item => item.name === '')) {
+                data.children = [];
+            }
+            return data;
+        }
+        show() {
+            let data = this.createChartData(this.root);
+            option.series[0].data = [{ name: 'root', label: { borderWidth: 0 }, children: [data] }];
+            myChart.setOption(option);
+        }
+    }
+    class TopSplayTree extends BinaryTree {
+        constructor() {
+            super();
+            this.leftMax = null;
+            this.rightMin = null;
+        }
+        initHeader() {
+            this.header = new BinaryTree();
+            this.header.addItem({ num: NaN });
+            this.leftMax = this.rightMin = this.header.root;
+        }
+        singleRotationWithLeft(node) {
+            let tempNode = node.left;
+            node.left = tempNode.right;
+            tempNode.right = node;
+            return tempNode;
+        }
+        singleRotationWithRight(node) {
+            let tempNode = node.right;
+            node.right = tempNode.left;
+            tempNode.left = node;
+            return tempNode;
+        }
+        splay(item, node) {
+            this.initHeader();
+            let comp;
+            while ((comp = itemCompare(item, node.item)) !== 0) {
+                if (comp < 0) {
+                    if (!node.left) {
+                        break;
+                    }
+                    if (itemCompare(item, node.left.item) < 0) {
+                        node = this.singleRotationWithLeft(node);
+                    }
+                    if (!node.left) {
+                        break;
+                    }
+                    this.rightMin.left = node;
+                    this.rightMin = node;
+                    node = node.left;
+                }
+                else {
+                    if (!node.right) {
+                        break;
+                    }
+                    if (itemCompare(item, node.right.item) > 0) {
+                        node = this.singleRotationWithRight(node);
+                    }
+                    if (!node.right) {
+                        break;
+                    }
+                    this.leftMax.right = node;
+                    this.leftMax = node;
+                    node = node.right;
+                }
+            }
+            this.leftMax.right = node.left;
+            this.rightMin.left = node.right;
+            node.left = this.header.root.right;
+            node.right = this.header.root.left;
+            return node;
+        }
+        find(item) {
+            if (!this.root) {
+                return undefined;
+            }
+            let node = this.splay(item, this.root);
+            this.root = node;
+            if (itemCompare(item, node.item) !== 0) {
+                return undefined;
+            }
+            return node.item;
+        }
+        insert(item) {
+            if (!this.root) {
+                this.addItem(item);
+                return;
+            }
+            let node = this.splay(item, this.root);
+            let newNode = this.createNode(item);
+            if (itemCompare(item, node.item) < 0) {
+                newNode.left = node.left;
+                newNode.right = node;
+                node.left = null;
+            }
+            else {
+                newNode.right = node.right;
+                newNode.left = node;
+                node.right = null;
+            }
+            this.root = newNode;
+            this.size++;
+        }
+        delete(item) {
+            if (!this.root) {
+                return false;
+            }
+            let node = this.splay(item, this.root);
+            if (itemCompare(item, node.item) !== 0) {
+                this.root = node;
+                return false;
+            }
+            this.size--;
+            if (!node.left) {
+                this.root = node.right;
+            }
+            else {
+                let rightNode = node.right;
+                node = node.left;
+                node = this.splay(item, node);
+                if (node.right) {
+                    console.error('has right');
+                }
+                node.right = rightNode;
+                this.root = node;
+            }
+            return true;
+        }
+    }
+    let testcase = [12, 5, 25, 30, 20, 24, 15, 13, 18, 16, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    testcase = testcase.concat(testcase);
+    let tree = new TopSplayTree();
+    tree.show();
+    function* test1() {
+        for (let num of testcase) {
+            console.log(num);
+            tree.insert({ num });
+            tree.show();
+            yield;
+        }
+    }
+    function* test2() {
+        testcase = testcase.reverse();
+        for (let num of testcase) {
+            console.log(num);
+            tree.delete({ num });
+            tree.show();
+            yield;
+        }
+    }
+    let gen1 = test1();
+    let gen2 = test2();
+    function insertToTree() {
+        gen1.next();
+    }
+    function deleteFromTree() {
+        gen2.next();
+    }
+    //# sourceMappingURL=tree.js.map
+</script>
+</body>
+</html>
