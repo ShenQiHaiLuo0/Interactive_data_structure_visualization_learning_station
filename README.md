@@ -109,11 +109,11 @@
 
 **操作界面**
 ```
-<img src="Sample_images/image (1).png" alt="图片1" width="300"><br/>
-<img src="Sample_images/image (2).png" alt="图片2" width="300">
-<img src="Sample_images/image (3).png" alt="图片3" width="300">
-<img src="Sample_images/image (4).png" alt="图片4" width="300">
-<img src="Sample_images/image (5).png" alt="图片5" width="300">
+<img src="/Sample_images/image (1).png" alt="图片1" width="300"><br/>
+<img src="/Sample_images/image (2).png" alt="图片2" width="300">
+<img src="/Sample_images/image (3).png" alt="图片3" width="300">
+<img src="/Sample_images/image (4).png" alt="图片4" width="300">
+<img src="/Sample_images/image (5).png" alt="图片5" width="300">
 
 ```
 
