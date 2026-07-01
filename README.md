@@ -93,6 +93,12 @@
 
 ### 运行方式
 
+**下载**
+```
+下载压缩包MiniDataStructureWeb.zip到本地<br/>
+然后使用任意解压缩工具得到文件夹：MiniDataStructureWeb进入即可。
+```
+
 **方式一：直接打开**
 
 ```
